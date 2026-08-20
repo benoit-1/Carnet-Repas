@@ -15,14 +15,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --board:#1B4B72;
-    --board-dark:#123453;
+    --board:#1565C0;
+    --board-dark:#0D4A93;
     --paper:#F0F4F7;
     --card:#FFFFFF;
     --ink:#1E2B33;
     --ink-muted:#657585;
-    --yellow:#E8AE3D;
-    --yellow-dark:#C9922C;
+    --yellow:#0288D1;
+    --yellow-dark:#026CA6;
     --terracotta:#C1584A;
     --sage:#2E7D6B;
     --line:#DCE4EA;
@@ -88,9 +88,9 @@
   .todayCard:active{transform:translateY(4px);box-shadow:0 2px 0 var(--yellow-dark);}
   .todayCard .icon{font-size:28px;line-height:1;}
   .todayCard .txt strong{
-    display:block;font-family:'Fredoka',sans-serif;font-size:16px;color:#3A2A0D;
+    display:block;font-family:'Fredoka',sans-serif;font-size:16px;color:#FFFFFF;
   }
-  .todayCard .txt span{font-size:12.5px;color:#5A431A;}
+  .todayCard .txt span{font-size:12.5px;color:#DCEEFB;}
 
   .todayCard.done{
     background:var(--card);
@@ -186,6 +186,21 @@
 
   #cameraInput{display:none;}
 
+  .date-picker-body{padding-top:6px;}
+  .date-picker-body p.hint{
+    font-size:13px;color:var(--ink-muted);margin:0 0 14px;
+  }
+  input.date-input{
+    width:100%;border:1px solid var(--line);border-radius:10px;background:var(--card);
+    padding:12px;font-family:'DM Sans';font-size:15px;color:var(--ink);outline:none;margin-bottom:14px;
+  }
+  .quick-dates{display:flex;gap:8px;margin-bottom:16px;}
+  .quick-dates button{
+    flex:1;border:1px solid var(--line);background:var(--card);border-radius:9px;
+    padding:9px 4px;font-size:12.5px;font-family:'DM Sans';color:var(--ink);cursor:pointer;
+  }
+  .quick-dates button.active{background:var(--board);color:var(--paper);border-color:var(--board);}
+
   /* Overlay / detail */
   .overlay{
     position:fixed;inset:0;
@@ -276,7 +291,7 @@
     flex:1;border:none;border-radius:10px;padding:13px;font-family:'Fredoka',sans-serif;
     font-weight:600;font-size:14px;cursor:pointer;
   }
-  .btn.save{background:var(--yellow);color:#3A2A0D;box-shadow:0 4px 0 var(--yellow-dark);}
+  .btn.save{background:var(--yellow);color:#FFFFFF;box-shadow:0 4px 0 var(--yellow-dark);}
   .btn.save:active{transform:translateY(3px);box-shadow:0 1px 0 var(--yellow-dark);}
   .btn.copy{background:var(--card);color:var(--ink);border:1px solid var(--line);flex:0 0 46px;font-size:16px;}
   .toast{
@@ -300,7 +315,7 @@
     color:#D4E2EC;margin-top:6px;
   }
   .mode-badge .dot{width:6px;height:6px;border-radius:50%;background:#7FD6A8;}
-  .mode-badge.local .dot{background:#E8AE3D;}
+  .mode-badge.local .dot{background:#0288D1;}
 
   .field-label{
     font-size:12px;font-weight:600;color:var(--ink-muted);margin:14px 0 5px;
@@ -393,8 +408,44 @@
       Toutes vos données (photos et chiffres) sont enregistrées <strong>directement sur cet appareil</strong>, dans le navigateur — rien à configurer, rien envoyé ailleurs.
     </p>
 
+    <button class="add-row" id="emailMonthBtn" style="margin-bottom:8px;">📧 Récap du mois par email</button>
     <button class="add-row" id="exportCsvBtn" style="margin-bottom:8px;">📊 Récap chiffres (fichier Excel/CSV)</button>
     <button class="add-row" id="exportBackupBtn" style="margin-bottom:6px;">🗂️ Sauvegarde complète (avec photos)</button>
+  </div>
+</div>
+
+<div class="overlay" id="datePickerOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-top">
+      <span class="date">Photo pour quel jour ?</span>
+      <button class="close-btn" id="closeDatePicker">✕</button>
+    </div>
+    <div class="date-picker-body">
+      <p class="hint">Par défaut c'est aujourd'hui. Pour un jour plus ancien (une semaine, un mois...), utilisez le calendrier ci-dessous.</p>
+      <div class="quick-dates">
+        <button type="button" id="quickToday">Aujourd'hui</button>
+        <button type="button" id="quickYesterday">Hier</button>
+      </div>
+      <input type="date" class="date-input" id="datePickerInput">
+      <button class="btn save" id="confirmDateBtn" style="width:100%;">📷 Prendre la photo</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="monthPickerOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-top">
+      <span class="date">Récap de quel mois ?</span>
+      <button class="close-btn" id="closeMonthPicker">✕</button>
+    </div>
+    <div class="date-picker-body">
+      <p class="hint">Choisissez le mois à récapituler — le récap s'ouvrira dans l'app Mail, prêt à envoyer.</p>
+      <input type="month" class="date-input" id="monthPickerInput">
+      <button class="btn save" id="confirmMonthBtn" style="width:100%;margin-bottom:8px;">📧 Chiffres par email</button>
+      <button class="add-row" id="confirmMonthPhotosBtn" style="width:100%;">🖼️ Chiffres + photos (PDF compressé)</button>
+    </div>
   </div>
 </div>
 
@@ -599,7 +650,7 @@ function updateTodayCard(entry){
     card.classList.remove('done');
     title.textContent = 'Photographier la liste du jour';
     sub.textContent = 'Prend 2 secondes, la saisie peut attendre';
-    card.onclick = ()=>document.getElementById('cameraInput').click();
+    card.onclick = ()=>openDatePicker();
   }
 }
 
@@ -671,15 +722,61 @@ document.getElementById('overlay').addEventListener('click', (e)=>{
   if(e.target.id === 'overlay') closeSheet();
 });
 
+let pendingCaptureKey = null;
+
+function openDatePicker(){
+  const input = document.getElementById('datePickerInput');
+  input.value = todayKey;
+  input.max = todayKey;
+  document.getElementById('quickToday').classList.add('active');
+  document.getElementById('quickYesterday').classList.remove('active');
+  document.getElementById('datePickerOverlay').classList.add('open');
+}
+function closeDatePicker(){
+  document.getElementById('datePickerOverlay').classList.remove('open');
+}
+function yesterdayKey(){
+  const d = new Date();
+  d.setDate(d.getDate()-1);
+  return dateKey(d);
+}
+
+document.getElementById('closeDatePicker').addEventListener('click', closeDatePicker);
+document.getElementById('datePickerOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'datePickerOverlay') closeDatePicker();
+});
+document.getElementById('quickToday').addEventListener('click', ()=>{
+  document.getElementById('datePickerInput').value = todayKey;
+  document.getElementById('quickToday').classList.add('active');
+  document.getElementById('quickYesterday').classList.remove('active');
+});
+document.getElementById('quickYesterday').addEventListener('click', ()=>{
+  document.getElementById('datePickerInput').value = yesterdayKey();
+  document.getElementById('quickYesterday').classList.add('active');
+  document.getElementById('quickToday').classList.remove('active');
+});
+document.getElementById('datePickerInput').addEventListener('input', ()=>{
+  document.getElementById('quickToday').classList.toggle('active', document.getElementById('datePickerInput').value === todayKey);
+  document.getElementById('quickYesterday').classList.toggle('active', document.getElementById('datePickerInput').value === yesterdayKey());
+});
+document.getElementById('confirmDateBtn').addEventListener('click', ()=>{
+  const chosen = document.getElementById('datePickerInput').value;
+  if(!chosen){ showToast('Choisissez une date'); return; }
+  pendingCaptureKey = chosen;
+  closeDatePicker();
+  document.getElementById('cameraInput').click();
+});
+
 document.getElementById('addRowBtn').addEventListener('click', ()=>{
   workingRows.push({label:'', count:''});
   renderRows(workingRows);
 });
 
 document.getElementById('fabBtn').addEventListener('click', ()=>{
-  document.getElementById('cameraInput').click();
+  openDatePicker();
 });
 document.getElementById('retakeBtn').addEventListener('click', ()=>{
+  pendingCaptureKey = openKey;
   document.getElementById('cameraInput').click();
 });
 
@@ -689,7 +786,8 @@ document.getElementById('cameraInput').addEventListener('change', async (e)=>{
   showToast('Photo en cours de traitement…');
   try{
     const dataUrl = await compressImage(file);
-    const key = openKey || todayKey;
+    const key = pendingCaptureKey || openKey || todayKey;
+    pendingCaptureKey = null;
     let entry = currentEntries[key] || await loadEntry(key) || {date:key, rows: defaultRows(), note:''};
     entry.photo = dataUrl;
     entry.photoTime = new Date().toISOString();
@@ -698,7 +796,7 @@ document.getElementById('cameraInput').addEventListener('change', async (e)=>{
       currentEntries[key] = entry;
       showToast('Photo enregistrée ✓');
       await renderRail();
-      if(openKey === key || !openKey) openSheet(key);
+      openSheet(key);
     }else{
       showToast("Erreur lors de l'enregistrement");
     }
@@ -708,6 +806,7 @@ document.getElementById('cameraInput').addEventListener('change', async (e)=>{
   }
   e.target.value = '';
 });
+
 
 document.getElementById('saveBtn').addEventListener('click', async ()=>{
   if(!openKey) return;
@@ -797,6 +896,146 @@ document.getElementById('exportBackupBtn').addEventListener('click', async ()=>{
   if(Object.keys(all).length === 0){ showToast('Aucune donnée à exporter'); return; }
   const blob = new Blob([JSON.stringify(all, null, 2)], {type:'application/json'});
   await shareOrDownload(blob, `carnet-repas-sauvegarde-${todayKey}.json`, 'application/json', 'Sauvegarde carnet de repas');
+});
+
+const MONTHS_LONG_FR = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+
+async function buildMonthRecap(month){
+  const all = await getAllEntries();
+  const dates = Object.keys(all).filter(d=> d.startsWith(month)).sort();
+  if(dates.length === 0) return null;
+  const [y, m] = month.split('-').map(Number);
+  const monthLabel = `${MONTHS_LONG_FR[m-1]} ${y}`;
+
+  let grandTotal = 0;
+  let body = `Récap repas — ${monthLabel}\n\n`;
+  dates.forEach(d=>{
+    const entry = all[d];
+    const rows = (entry.rows || []).filter(r=> r.label);
+    const total = rows.reduce((s,r)=> s + (parseInt(r.count)||0), 0);
+    grandTotal += total;
+    const dayName = DAYS_FR[new Date(d).getDay()] || '';
+    body += `${formatShort(d)} (${dayName}) : `;
+    body += rows.map(r=> `${r.label} ${r.count||0}`).join(', ');
+    body += ` — Total ${total}`;
+    if(entry.note) body += ` [${entry.note}]`;
+    body += '\n';
+  });
+  body += `\nTotal du mois : ${grandTotal} repas sur ${dates.length} jour(s) renseigné(s).`;
+
+  return {all, dates, monthLabel, body, subject: `Récap repas — ${monthLabel}`};
+}
+
+function loadScript(src){
+  return new Promise((resolve, reject)=>{
+    if(document.querySelector(`script[src="${src}"]`)){ resolve(); return; }
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+function compressForPdf(dataUrl){
+  return new Promise((resolve, reject)=>{
+    const img = new Image();
+    img.onload = ()=>{
+      const maxDim = 700;
+      let w = img.width, h = img.height;
+      if(w > h && w > maxDim){ h = Math.round(h*maxDim/w); w = maxDim; }
+      else if(h >= w && h > maxDim){ w = Math.round(w*maxDim/h); h = maxDim; }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      resolve({dataUrl: canvas.toDataURL('image/jpeg', 0.5), w, h});
+    };
+    img.onerror = reject;
+    img.src = dataUrl;
+  });
+}
+
+async function buildMonthPDF(recap){
+  if(!window.jspdf){
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+  }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:'mm', format:'a4'});
+  const pageW = 210, pageH = 297, margin = 15;
+
+  doc.setFontSize(18);
+  doc.text(recap.subject, margin, 22);
+  doc.setFontSize(10.5);
+  const bodyLines = doc.splitTextToSize(recap.body, pageW - margin*2);
+  doc.text(bodyLines, margin, 32);
+
+  for(const d of recap.dates){
+    const entry = recap.all[d];
+    if(!entry.photo) continue;
+    doc.addPage();
+    const {dataUrl: compressed, w: iw, h: ih} = await compressForPdf(entry.photo);
+    const maxW = pageW - margin*2;
+    const maxH = pageH - 60;
+    let w = maxW;
+    let h = (ih * w) / iw;
+    if(h > maxH){ h = maxH; w = (iw * h) / ih; }
+
+    const rows = (entry.rows||[]).filter(r=>r.label);
+    const total = rows.reduce((s,r)=> s + (parseInt(r.count)||0),0);
+
+    doc.setFontSize(14);
+    doc.text(formatLong(d), margin, 20);
+    doc.setFontSize(11);
+    doc.text(rows.map(r=>`${r.label}: ${r.count||0}`).join('   ') + `   —   Total: ${total}`, margin, 28);
+    if(entry.note){
+      doc.setFontSize(9.5);
+      doc.text(`Note : ${entry.note}`, margin, 34);
+    }
+    doc.addImage(compressed, 'JPEG', margin, 40, w, h);
+  }
+
+  return doc.output('blob');
+}
+
+document.getElementById('emailMonthBtn').addEventListener('click', ()=>{
+  document.getElementById('settingsOverlay').classList.remove('open');
+  const input = document.getElementById('monthPickerInput');
+  input.value = todayKey.slice(0,7);
+  input.max = todayKey.slice(0,7);
+  document.getElementById('monthPickerOverlay').classList.add('open');
+});
+document.getElementById('closeMonthPicker').addEventListener('click', ()=>{
+  document.getElementById('monthPickerOverlay').classList.remove('open');
+});
+document.getElementById('monthPickerOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'monthPickerOverlay') document.getElementById('monthPickerOverlay').classList.remove('open');
+});
+
+document.getElementById('confirmMonthBtn').addEventListener('click', async ()=>{
+  const month = document.getElementById('monthPickerInput').value; // "YYYY-MM"
+  if(!month){ showToast('Choisissez un mois'); return; }
+  const recap = await buildMonthRecap(month);
+  if(!recap){ showToast('Aucune donnée pour ce mois'); return; }
+  const mailtoUrl = `mailto:?subject=${encodeURIComponent(recap.subject)}&body=${encodeURIComponent(recap.body)}`;
+  window.location.href = mailtoUrl;
+  document.getElementById('monthPickerOverlay').classList.remove('open');
+});
+
+document.getElementById('confirmMonthPhotosBtn').addEventListener('click', async ()=>{
+  const month = document.getElementById('monthPickerInput').value;
+  if(!month){ showToast('Choisissez un mois'); return; }
+  const recap = await buildMonthRecap(month);
+  if(!recap){ showToast('Aucune donnée pour ce mois'); return; }
+  showToast('Compression des photos et création du PDF…');
+  try{
+    const pdfBlob = await buildMonthPDF(recap);
+    document.getElementById('monthPickerOverlay').classList.remove('open');
+    await shareOrDownload(pdfBlob, `recap-repas-${month}.pdf`, 'application/pdf', recap.subject);
+  }catch(e){
+    console.error(e);
+    showToast('Erreur lors de la création du PDF');
+  }
 });
 
 document.getElementById('gearBtn').addEventListener('click', ()=>{
