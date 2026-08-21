@@ -502,7 +502,7 @@
   <button class="todayCard" id="todayCard">
     <span class="icon">📸</span>
     <span class="txt">
-      <strong id="todayCardTitle">Photographier la liste du jour</strong>
+      <strong id="todayCardTitle">Photographier la liste et les tickets</strong>
       <span id="todayCardSub">Prend 2 secondes, la saisie peut attendre</span>
     </span>
   </button>
@@ -535,7 +535,7 @@
 
 <input type="file" accept="image/*" capture="environment" id="cameraInput">
 
-<button class="fab" id="fabBtn">📷 Photographier la liste</button>
+<button class="fab" id="fabBtn">📷 Photographier la liste et les tickets</button>
 
 <div class="overlay" id="overlay">
   <div class="sheet">
@@ -546,7 +546,7 @@
     </div>
 
     <div class="photo-wrap">
-      <img id="sheetImg" src="" alt="Photo de la liste">
+      <img id="sheetImg" src="" alt="Photo de la liste et des tickets">
       <button class="retake" id="retakeBtn">🔄 Reprendre</button>
     </div>
 
@@ -982,7 +982,7 @@ function updateTodayCard(entry){
     card.onclick = ()=>openSheet(todayKey);
   }else{
     card.classList.remove('done');
-    title.textContent = 'Photographier la liste du jour';
+    title.textContent = 'Photographier la liste et les tickets';
     sub.textContent = 'Prend 2 secondes, la saisie peut attendre';
     card.onclick = ()=>{ captureTarget = 'main'; openDatePicker(); };
   }
