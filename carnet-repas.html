@@ -95,8 +95,9 @@
     margin:16px 20px 0;
     background:var(--card);
     border-radius:var(--radius);
-    padding:16px;
+    padding:9px 10px;
     border:1px solid var(--line);
+    max-width:190px;
   }
 
   .old-month-banner{
@@ -117,37 +118,37 @@
   .omb-btn.danger{background:#C1584A;color:#fff;border:none;}
 
   .cal-nav{
-    display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;
+    display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;
   }
   .cal-nav-btn{
-    background:var(--card);border:1px solid var(--line);border-radius:9px;
-    width:34px;height:34px;font-size:14px;color:var(--ink);cursor:pointer;
+    background:var(--card);border:1px solid var(--line);border-radius:6px;
+    width:22px;height:22px;font-size:9px;color:var(--ink);cursor:pointer;padding:0;
   }
   .cal-month-label{
-    font-family:'Fredoka',sans-serif;font-weight:600;font-size:15px;color:var(--ink);text-transform:capitalize;
+    font-family:'Fredoka',sans-serif;font-weight:600;font-size:11px;color:var(--ink);text-transform:capitalize;
   }
   .cal-weekdays{
     display:grid;grid-template-columns:repeat(7,1fr);text-align:center;
-    font-size:11px;color:var(--ink-muted);font-weight:600;margin-bottom:6px;
+    font-size:7.5px;color:var(--ink-muted);font-weight:600;margin-bottom:3px;
   }
   .cal-grid{
-    display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:16px;
+    display:grid;grid-template-columns:repeat(7,1fr);gap:2.5px;margin-bottom:8px;
   }
   .cal-cell{
     aspect-ratio:1;display:flex;align-items:center;justify-content:center;
-    border-radius:9px;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:600;
+    border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;
     cursor:pointer;position:relative;
   }
   .cal-cell.empty{cursor:default;}
   .cal-cell.done{background:#E3F1EC;color:#1E5C43;}
   .cal-cell.missing{background:#FBE7E4;color:#8A3226;}
   .cal-cell.future{background:var(--paper);color:#B7C1C9;cursor:default;}
-  .cal-cell.today{box-shadow:0 0 0 2px var(--board) inset;}
+  .cal-cell.today{box-shadow:0 0 0 1.5px var(--board) inset;}
   .cal-legend{
-    display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--ink-muted);padding-bottom:6px;
+    display:flex;gap:8px;flex-wrap:wrap;font-size:8px;color:var(--ink-muted);padding-bottom:0;
   }
-  .cal-legend span{display:flex;align-items:center;gap:5px;}
-  .cal-dot{width:9px;height:9px;border-radius:3px;display:inline-block;}
+  .cal-legend span{display:flex;align-items:center;gap:3px;}
+  .cal-dot{width:6px;height:6px;border-radius:2px;display:inline-block;}
   .cal-dot.done{background:#1E5C43;}
   .cal-dot.missing{background:#C1584A;}
   .cal-dot.future{background:#DCE4EA;}
@@ -1616,47 +1617,47 @@ document.getElementById('oldMonthDeleteBtn').addEventListener('click', ()=>{
   openDeleteMonthPicker(month);
 });
 
-let calYear, calMonth; // calMonth: 1-12
-{
-  const [y, m] = todayKey.slice(0,7).split('-').map(Number);
-  calYear = y; calMonth = m;
+function mondayOf(d){
+  const day = (d.getDay() + 6) % 7; // 0 = lundi
+  const monday = new Date(d);
+  monday.setDate(d.getDate() - day);
+  monday.setHours(0,0,0,0);
+  return monday;
 }
+
+let calWeekStart = mondayOf(new Date());
+
 document.getElementById('calPrevBtn').addEventListener('click', ()=>{
-  calMonth -= 1;
-  if(calMonth < 1){ calMonth = 12; calYear -= 1; }
+  calWeekStart.setDate(calWeekStart.getDate() - 7);
   renderCalendarGrid();
 });
 document.getElementById('calNextBtn').addEventListener('click', ()=>{
-  const currentMonthKey = todayKey.slice(0,7);
-  const thisCalKey = `${calYear}-${String(calMonth).padStart(2,'0')}`;
-  if(thisCalKey >= currentMonthKey) return; // pas de mois futur
-  calMonth += 1;
-  if(calMonth > 12){ calMonth = 1; calYear += 1; }
+  const thisMonday = mondayOf(new Date());
+  if(calWeekStart.getTime() >= thisMonday.getTime()) return; // pas de semaine future
+  calWeekStart.setDate(calWeekStart.getDate() + 7);
   renderCalendarGrid();
 });
 
 function renderCalendarGrid(){
-  const label = `${MONTHS_LONG_FR[calMonth-1]} ${calYear}`;
+  const start = new Date(calWeekStart);
+  const end = new Date(calWeekStart);
+  end.setDate(end.getDate() + 6);
+  const sameMonth = start.getMonth() === end.getMonth();
+  const label = sameMonth
+    ? `${start.getDate()}–${end.getDate()} ${MONTHS_FR[end.getMonth()]}`
+    : `${start.getDate()} ${MONTHS_FR[start.getMonth()]} – ${end.getDate()} ${MONTHS_FR[end.getMonth()]}`;
   document.getElementById('calMonthLabel').textContent = label;
 
-  const currentMonthKey = todayKey.slice(0,7);
-  const thisCalKey = `${calYear}-${String(calMonth).padStart(2,'0')}`;
-  document.getElementById('calNextBtn').style.visibility = (thisCalKey >= currentMonthKey) ? 'hidden' : 'visible';
-
-  const firstDay = new Date(calYear, calMonth-1, 1);
-  const startOffset = (firstDay.getDay() + 6) % 7; // 0 = lundi
-  const daysInMonth = new Date(calYear, calMonth, 0).getDate();
+  const thisMonday = mondayOf(new Date());
+  document.getElementById('calNextBtn').style.visibility = (calWeekStart.getTime() >= thisMonday.getTime()) ? 'hidden' : 'visible';
 
   const grid = document.getElementById('calGrid');
   grid.innerHTML = '';
-  for(let i=0; i<startOffset; i++){
-    const empty = document.createElement('div');
-    empty.className = 'cal-cell empty';
-    grid.appendChild(empty);
-  }
 
-  for(let day=1; day<=daysInMonth; day++){
-    const dateStr = `${thisCalKey}-${String(day).padStart(2,'0')}`;
+  for(let i=0; i<7; i++){
+    const d = new Date(calWeekStart);
+    d.setDate(d.getDate() + i);
+    const dateStr = dateKey(d);
     const cell = document.createElement('div');
     cell.className = 'cal-cell';
     const entry = currentEntries[dateStr];
@@ -1668,7 +1669,7 @@ function renderCalendarGrid(){
     else cell.classList.add('missing');
 
     if(dateStr === todayKey) cell.classList.add('today');
-    cell.textContent = day;
+    cell.textContent = d.getDate();
 
     if(entry){
       cell.addEventListener('click', ()=>{
