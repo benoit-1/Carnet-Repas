@@ -71,6 +71,87 @@
     text-transform:capitalize;
   }
 
+  .month-total-card{
+    margin:16px 20px 0;
+    background:var(--card);
+    border-radius:var(--radius);
+    padding:14px 16px;
+    border:1px solid var(--line);
+  }
+  .mtc-top{
+    display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;
+  }
+  .mtc-label{
+    font-size:12.5px;font-weight:600;color:var(--ink-muted);text-transform:capitalize;
+  }
+  .mtc-sub{
+    font-size:11px;color:var(--ink-muted);font-family:'JetBrains Mono',monospace;
+  }
+  .mtc-value{
+    font-family:'JetBrains Mono',monospace;font-size:30px;font-weight:600;color:var(--board);
+  }
+
+  .calendar-card{
+    margin:16px 20px 0;
+    background:var(--card);
+    border-radius:var(--radius);
+    padding:16px;
+    border:1px solid var(--line);
+  }
+
+  .old-month-banner{
+    margin:14px 20px 0;
+    background:#FBF1EF;
+    border:1px solid #F0D3CE;
+    border-radius:var(--radius);
+    padding:13px 15px;
+  }
+  .omb-text{
+    font-size:12.5px;color:#8A3226;line-height:1.5;margin:0 0 10px;
+  }
+  .omb-actions{display:flex;gap:8px;}
+  .omb-btn{
+    flex:1;border:none;border-radius:9px;padding:9px;font-size:12.5px;font-weight:600;
+    font-family:'DM Sans';cursor:pointer;background:#fff;color:#8A3226;border:1px solid #F0D3CE;
+  }
+  .omb-btn.danger{background:#C1584A;color:#fff;border:none;}
+
+  .cal-nav{
+    display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;
+  }
+  .cal-nav-btn{
+    background:var(--card);border:1px solid var(--line);border-radius:9px;
+    width:34px;height:34px;font-size:14px;color:var(--ink);cursor:pointer;
+  }
+  .cal-month-label{
+    font-family:'Fredoka',sans-serif;font-weight:600;font-size:15px;color:var(--ink);text-transform:capitalize;
+  }
+  .cal-weekdays{
+    display:grid;grid-template-columns:repeat(7,1fr);text-align:center;
+    font-size:11px;color:var(--ink-muted);font-weight:600;margin-bottom:6px;
+  }
+  .cal-grid{
+    display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:16px;
+  }
+  .cal-cell{
+    aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+    border-radius:9px;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:600;
+    cursor:pointer;position:relative;
+  }
+  .cal-cell.empty{cursor:default;}
+  .cal-cell.done{background:#E3F1EC;color:#1E5C43;}
+  .cal-cell.missing{background:#FBE7E4;color:#8A3226;}
+  .cal-cell.future{background:var(--paper);color:#B7C1C9;cursor:default;}
+  .cal-cell.today{box-shadow:0 0 0 2px var(--board) inset;}
+  .cal-legend{
+    display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--ink-muted);padding-bottom:6px;
+  }
+  .cal-legend span{display:flex;align-items:center;gap:5px;}
+  .cal-dot{width:9px;height:9px;border-radius:3px;display:inline-block;}
+  .cal-dot.done{background:#1E5C43;}
+  .cal-dot.missing{background:#C1584A;}
+  .cal-dot.future{background:#DCE4EA;}
+
   .todayCard{
     margin:16px 20px 0;
     background:var(--yellow);
@@ -98,6 +179,30 @@
   }
   .todayCard.done .txt strong{color:var(--sage);}
   .todayCard.done .txt span{color:var(--ink-muted);}
+
+  @keyframes pulseGrow{
+    0%,100%{transform:scale(1);}
+    50%{transform:scale(1.05);}
+  }
+  .todayCard.pulsing{animation:pulseGrow 1.1s ease-in-out infinite;}
+
+  .off-duty-toggle{
+    display:block;
+    margin:10px 20px 0;
+    width:calc(100% - 40px);
+    background:none;
+    border:none;
+    text-align:center;
+    font-size:12.5px;
+    color:var(--ink-muted);
+    padding:6px;
+    cursor:pointer;
+    font-family:'DM Sans';
+  }
+  .off-duty-toggle.active{
+    color:var(--board);
+    font-weight:600;
+  }
 
   /* Rail */
   .section-title{
@@ -249,6 +354,18 @@
     cursor:pointer;display:flex;align-items:center;gap:5px;
   }
 
+  .guest-photo-empty{
+    border:1.5px dashed var(--line);border-radius:12px;
+    padding:16px;text-align:center;color:var(--ink-muted);font-size:13px;
+    cursor:pointer;margin-bottom:14px;background:var(--card);
+  }
+  .guest-photo-empty:active{background:var(--paper);}
+  .guest-photo-filled{
+    background:#fff;border-radius:12px;padding:8px;box-shadow:0 3px 0 var(--line);
+    margin-bottom:14px;position:relative;
+  }
+  .guest-photo-filled img{width:100%;display:block;border-radius:7px;max-height:200px;object-fit:cover;}
+
   .rows{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;}
   .row{
     display:flex;align-items:center;gap:8px;
@@ -294,6 +411,7 @@
   .btn.save{background:var(--yellow);color:#FFFFFF;box-shadow:0 4px 0 var(--yellow-dark);}
   .btn.save:active{transform:translateY(3px);box-shadow:0 1px 0 var(--yellow-dark);}
   .btn.copy{background:var(--card);color:var(--ink);border:1px solid var(--line);flex:0 0 46px;font-size:16px;}
+  .btn.copy.danger-outline{color:#C1584A;border-color:#F0D3CE;}
   .toast{
     position:fixed;bottom:100px;left:50%;transform:translateX(-50%);
     background:var(--board);color:var(--paper);padding:9px 16px;border-radius:10px;
@@ -335,6 +453,23 @@
   }
   .settings-status.ok{display:block;background:#E1F0EA;color:#1E5C43;}
   .settings-status.err{display:block;background:#FBE7E4;color:#8A3226;}
+
+  .delete-summary{
+    font-size:13px;color:var(--ink-muted);background:var(--card);border:1px solid var(--line);
+    border-radius:10px;padding:12px;margin-bottom:14px;line-height:1.5;
+  }
+  .delete-summary.has-data{color:#8A3226;background:#FBF1EF;border-color:#F0D3CE;font-weight:600;}
+  .delete-confirm-check{
+    display:flex;align-items:flex-start;gap:9px;font-size:13px;color:var(--ink);
+    margin-bottom:16px;cursor:pointer;line-height:1.4;
+  }
+  .delete-confirm-check input{margin-top:2px;flex-shrink:0;}
+  .btn.danger{
+    background:#C1584A;color:#fff;box-shadow:0 4px 0 #9A4238;
+  }
+  .btn.danger:disabled{
+    background:#DCC2BD;box-shadow:0 4px 0 #C7ADA8;cursor:not-allowed;
+  }
 </style>
 </head>
 <body>
@@ -347,6 +482,22 @@
     <p class="mode-badge" id="modeBadge"><span class="dot"></span><span id="modeText">Stockage Claude</span></p>
   </header>
 
+  <div class="month-total-card" id="monthTotalCard">
+    <div class="mtc-top">
+      <span class="mtc-label">Total du mois — <span id="mtcMonthName"></span></span>
+      <span class="mtc-sub" id="mtcSub"></span>
+    </div>
+    <div class="mtc-value" id="mtcValue">0</div>
+  </div>
+
+  <div class="old-month-banner" id="oldMonthBanner" style="display:none;">
+    <p class="omb-text" id="oldMonthText"></p>
+    <div class="omb-actions">
+      <button class="omb-btn" id="oldMonthEmailBtn">📧 Envoyer</button>
+      <button class="omb-btn danger" id="oldMonthDeleteBtn">🗑️ Supprimer</button>
+    </div>
+  </div>
+
   <button class="todayCard" id="todayCard">
     <span class="icon">📸</span>
     <span class="txt">
@@ -354,6 +505,25 @@
       <span id="todayCardSub">Prend 2 secondes, la saisie peut attendre</span>
     </span>
   </button>
+
+  <button class="off-duty-toggle" id="offDutyToggle">🌙 Je suis en repos aujourd'hui</button>
+
+  <div class="calendar-card">
+    <div class="cal-nav">
+      <button id="calPrevBtn" class="cal-nav-btn">◀</button>
+      <span id="calMonthLabel" class="cal-month-label"></span>
+      <button id="calNextBtn" class="cal-nav-btn">▶</button>
+    </div>
+    <div class="cal-weekdays">
+      <span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="cal-legend">
+      <span><i class="cal-dot done"></i> Renseigné</span>
+      <span><i class="cal-dot missing"></i> Non renseigné</span>
+      <span><i class="cal-dot future"></i> À venir</span>
+    </div>
+  </div>
 
   <p class="section-title">Historique</p>
   <div class="rail" id="rail"><div class="loading">Chargement…</div></div>
@@ -382,6 +552,9 @@
     <div class="rows" id="rowsWrap"></div>
     <button class="add-row" id="addRowBtn">+ Ajouter une ligne</button>
 
+    <p class="field-label" style="margin-top:16px;">Photo liste des invités (facultatif)</p>
+    <div id="guestPhotoWrap"></div>
+
     <textarea class="note" id="noteField" rows="2" placeholder="Note (facultatif) — régimes spéciaux, absents, etc."></textarea>
 
     <div class="total-bar">
@@ -392,6 +565,24 @@
     <div class="actions">
       <button class="btn save" id="saveBtn">Enregistrer</button>
       <button class="btn copy" id="copyBtn" title="Copier le récap">📋</button>
+      <button class="btn copy danger-outline" id="deleteDayBtn" title="Supprimer ce jour">🗑️</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="deleteDayOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-top">
+      <span class="date">Supprimer ce jour ?</span>
+      <button class="close-btn" id="closeDeleteDay">✕</button>
+    </div>
+    <div class="date-picker-body">
+      <p class="hint" id="deleteDayText"></p>
+      <div class="actions">
+        <button class="btn copy" id="cancelDeleteDayBtn" style="flex:1;">Annuler</button>
+        <button class="btn danger" id="confirmDeleteDayBtn" style="flex:1;">🗑️ Supprimer</button>
+      </div>
     </div>
   </div>
 </div>
@@ -410,7 +601,30 @@
 
     <button class="add-row" id="emailMonthBtn" style="margin-bottom:8px;">📧 Récap du mois par email</button>
     <button class="add-row" id="exportCsvBtn" style="margin-bottom:8px;">📊 Récap chiffres (fichier Excel/CSV)</button>
-    <button class="add-row" id="exportBackupBtn" style="margin-bottom:6px;">🗂️ Sauvegarde complète (avec photos)</button>
+    <button class="add-row" id="exportBackupBtn" style="margin-bottom:16px;">🗂️ Sauvegarde complète (avec photos)</button>
+
+    <div style="border-top:1px solid var(--line); margin: 4px 0 14px;"></div>
+    <button class="add-row" id="deleteMonthBtn" style="color:#C1584A; border-color:#F0D3CE;">🗑️ Supprimer un mois</button>
+  </div>
+</div>
+
+<div class="overlay" id="deleteMonthOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-top">
+      <span class="date">Supprimer un mois</span>
+      <button class="close-btn" id="closeDeleteMonth">✕</button>
+    </div>
+    <div class="date-picker-body">
+      <p class="hint">⚠️ Cette action est <strong>définitive</strong> — les photos et chiffres du mois choisi seront effacés de cet appareil. Vérifiez d'abord que le récap a bien été envoyé ou sauvegardé.</p>
+      <input type="month" class="date-input" id="deleteMonthInput">
+      <div class="delete-summary" id="deleteSummary">Choisissez un mois pour voir ce qui sera supprimé.</div>
+      <label class="delete-confirm-check">
+        <input type="checkbox" id="deleteConfirmCheck">
+        <span>Je confirme avoir déjà envoyé ou sauvegardé ce mois.</span>
+      </label>
+      <button class="btn danger" id="confirmDeleteBtn" style="width:100%;" disabled>🗑️ Supprimer définitivement ce mois</button>
+    </div>
   </div>
 </div>
 
@@ -522,6 +736,15 @@ async function idbListKeys(){
     req.onerror = ()=>reject(req.error);
   });
 }
+async function idbDelete(key){
+  const db = await idbOpen();
+  return new Promise((resolve, reject)=>{
+    const tx = db.transaction('entries','readwrite');
+    tx.objectStore('entries').delete(key);
+    tx.oncomplete = ()=>resolve(true);
+    tx.onerror = ()=>reject(tx.error);
+  });
+}
 const hasClaudeStorage = typeof window.storage !== 'undefined' && window.storage !== null;
 
 async function loadEntry(key){
@@ -560,6 +783,15 @@ async function listKeys(){
     const keys = await idbListKeys();
     return keys.map(k=>'entry:'+k);
   }catch(e){ console.error(e); return []; }
+}
+async function deleteEntry(key){
+  if(hasClaudeStorage){
+    try{
+      await window.storage.delete('entry:'+key, false);
+      return true;
+    }catch(e){ console.error(e); return false; }
+  }
+  try{ await idbDelete(key); return true; }catch(e){ console.error(e); return false; }
 }
 
 function updateModeBadge(){
@@ -605,6 +837,11 @@ async function renderRail(){
     railEl.innerHTML = '';
     document.getElementById('emptyState').style.display = 'block';
     updateTodayCard(null);
+    updateMonthTotal();
+    updateOldMonthBanner();
+    renderCalendarGrid();
+    updateAppBadge();
+    updatePulseState();
     return;
   }
   document.getElementById('emptyState').style.display = 'none';
@@ -614,6 +851,11 @@ async function renderRail(){
   dateKeys.forEach((k,i)=>{ if(entries[i]) currentEntries[k]=entries[i]; });
 
   updateTodayCard(currentEntries[todayKey] || null);
+  updateMonthTotal();
+  updateOldMonthBanner();
+  renderCalendarGrid();
+  updateAppBadge();
+  updatePulseState();
 
   railEl.innerHTML = '';
   dateKeys.forEach(k=>{
@@ -636,6 +878,97 @@ async function renderRail(){
   });
 }
 
+function updateMonthTotal(){
+  const monthKey = todayKey.slice(0,7); // "YYYY-MM"
+  const [y, m] = monthKey.split('-').map(Number);
+  document.getElementById('mtcMonthName').textContent = `${MONTHS_FR[m-1]} ${y}`;
+
+  let total = 0, daysCount = 0;
+  Object.keys(currentEntries).forEach(d=>{
+    if(!d.startsWith(monthKey)) return;
+    const rows = currentEntries[d].rows || [];
+    const t = rows.reduce((s,r)=> s + (parseInt(r.count)||0), 0);
+    if(t > 0) daysCount++;
+    total += t;
+  });
+  document.getElementById('mtcValue').textContent = total;
+  document.getElementById('mtcSub').textContent = daysCount > 0 ? `${daysCount} jour(s) renseigné(s)` : 'aucun jour renseigné';
+}
+
+async function updateAppBadge(){
+  if(!('setAppBadge' in navigator)) return;
+  try{
+    const entry = currentEntries[todayKey];
+    const hasCounts = entry && entry.rows && entry.rows.some(r=> r.count !== '' && r.count != null && parseInt(r.count) > 0);
+    if(hasCounts){
+      await navigator.clearAppBadge();
+    }else{
+      await navigator.setAppBadge(1);
+    }
+  }catch(e){ /* silencieux, badge non critique */ }
+}
+
+function updatePulseState(){
+  const entry = currentEntries[todayKey];
+  const hasCounts = entry && entry.rows && entry.rows.some(r=> r.count !== '' && r.count != null && parseInt(r.count) > 0);
+  const isOffDuty = !!(entry && entry.offDuty);
+  const now = new Date();
+  const cutoff = new Date();
+  cutoff.setHours(14, 30, 0, 0);
+  const shouldPulse = now >= cutoff && !hasCounts && !isOffDuty;
+
+  document.getElementById('todayCard').classList.toggle('pulsing', shouldPulse);
+
+  const toggle = document.getElementById('offDutyToggle');
+  if(isOffDuty){
+    toggle.textContent = "☀️ Annuler le repos";
+    toggle.classList.add('active');
+  }else{
+    toggle.textContent = "🌙 Je suis en repos aujourd'hui";
+    toggle.classList.remove('active');
+  }
+}
+setInterval(updatePulseState, 60000);
+
+document.getElementById('offDutyToggle').addEventListener('click', async ()=>{
+  let entry = currentEntries[todayKey] || await loadEntry(todayKey) || {date: todayKey, rows: defaultRows(), note:''};
+  entry.offDuty = !entry.offDuty;
+  const ok = await saveEntry(todayKey, entry);
+  if(ok){
+    currentEntries[todayKey] = entry;
+    showToast(entry.offDuty ? 'Marqué comme repos 🌙' : 'Repos annulé');
+    await renderRail();
+  }else{
+    showToast('Erreur — réessayez');
+  }
+});
+
+function updateOldMonthBanner(){
+  const [cy, cm] = todayKey.slice(0,7).split('-').map(Number);
+  // On garde le mois en cours + le mois précédent (2 mois) sans avertissement
+  let cutoffY = cy, cutoffM = cm - 1;
+  if(cutoffM < 1){ cutoffM = 12; cutoffY -= 1; }
+  const cutoffKey = `${cutoffY}-${String(cutoffM).padStart(2,'0')}`;
+
+  const monthsPresent = new Set();
+  Object.keys(currentEntries).forEach(d=> monthsPresent.add(d.slice(0,7)));
+  const oldMonths = [...monthsPresent].filter(mo => mo < cutoffKey).sort();
+
+  const banner = document.getElementById('oldMonthBanner');
+  if(oldMonths.length === 0){
+    banner.style.display = 'none';
+    return;
+  }
+  const oldest = oldMonths[0];
+  const [y, m] = oldest.split('-').map(Number);
+  const label = `${MONTHS_LONG_FR[m-1]} ${y}`;
+  const extra = oldMonths.length > 1 ? ` (+ ${oldMonths.length - 1} autre(s) mois)` : '';
+  document.getElementById('oldMonthText').textContent =
+    `Vous avez encore des données de ${label}${extra}, datant de plus de 2 mois. Pensez à envoyer le récap puis à le supprimer pour garder l'appli légère.`;
+  banner.dataset.month = oldest;
+  banner.style.display = 'block';
+}
+
 function updateTodayCard(entry){
   const card = document.getElementById('todayCard');
   const title = document.getElementById('todayCardTitle');
@@ -650,14 +983,16 @@ function updateTodayCard(entry){
     card.classList.remove('done');
     title.textContent = 'Photographier la liste du jour';
     sub.textContent = 'Prend 2 secondes, la saisie peut attendre';
-    card.onclick = ()=>openDatePicker();
+    card.onclick = ()=>{ captureTarget = 'main'; openDatePicker(); };
   }
 }
 
 function defaultRows(){
   return [
     {label:'Résidents', count:''},
-    {label:'Personnel', count:''}
+    {label:'Personnel', count:''},
+    {label:'Direction', count:''},
+    {label:'Invités', count:''}
   ];
 }
 
@@ -709,7 +1044,32 @@ async function openSheet(key){
   document.getElementById('noteField').value = entry.note || '';
   renderRows(workingRows);
   updateTotal();
+  renderGuestPhoto(entry.guestPhoto);
   document.getElementById('overlay').classList.add('open');
+}
+
+function renderGuestPhoto(url){
+  const wrap = document.getElementById('guestPhotoWrap');
+  if(url){
+    wrap.innerHTML = `
+      <div class="guest-photo-filled">
+        <img src="${url}" alt="Photo liste invités">
+        <button class="retake" id="guestRetakeBtn">🔄 Reprendre</button>
+      </div>
+    `;
+    document.getElementById('guestRetakeBtn').addEventListener('click', ()=>{
+      captureTarget = 'guest';
+      pendingCaptureKey = openKey;
+      document.getElementById('cameraInput').click();
+    });
+  }else{
+    wrap.innerHTML = `<div class="guest-photo-empty" id="guestAddBtn">📷 Ajouter une photo de la liste des invités</div>`;
+    document.getElementById('guestAddBtn').addEventListener('click', ()=>{
+      captureTarget = 'guest';
+      pendingCaptureKey = openKey;
+      document.getElementById('cameraInput').click();
+    });
+  }
 }
 
 function closeSheet(){
@@ -723,6 +1083,7 @@ document.getElementById('overlay').addEventListener('click', (e)=>{
 });
 
 let pendingCaptureKey = null;
+let captureTarget = 'main';
 
 function openDatePicker(){
   const input = document.getElementById('datePickerInput');
@@ -773,9 +1134,11 @@ document.getElementById('addRowBtn').addEventListener('click', ()=>{
 });
 
 document.getElementById('fabBtn').addEventListener('click', ()=>{
+  captureTarget = 'main';
   openDatePicker();
 });
 document.getElementById('retakeBtn').addEventListener('click', ()=>{
+  captureTarget = 'main';
   pendingCaptureKey = openKey;
   document.getElementById('cameraInput').click();
 });
@@ -787,14 +1150,20 @@ document.getElementById('cameraInput').addEventListener('change', async (e)=>{
   try{
     const dataUrl = await compressImage(file);
     const key = pendingCaptureKey || openKey || todayKey;
+    const target = captureTarget;
     pendingCaptureKey = null;
+    captureTarget = 'main';
     let entry = currentEntries[key] || await loadEntry(key) || {date:key, rows: defaultRows(), note:''};
-    entry.photo = dataUrl;
-    entry.photoTime = new Date().toISOString();
+    if(target === 'guest'){
+      entry.guestPhoto = dataUrl;
+    }else{
+      entry.photo = dataUrl;
+      entry.photoTime = new Date().toISOString();
+    }
     const ok = await saveEntry(key, entry);
     if(ok){
       currentEntries[key] = entry;
-      showToast('Photo enregistrée ✓');
+      showToast(target === 'guest' ? 'Photo invités enregistrée ✓' : 'Photo enregistrée ✓');
       await renderRail();
       openSheet(key);
     }else{
@@ -836,6 +1205,37 @@ document.getElementById('copyBtn').addEventListener('click', async ()=>{
     showToast('Récap copié ✓');
   }catch(e){
     showToast('Copie impossible sur cet appareil');
+  }
+});
+
+document.getElementById('deleteDayBtn').addEventListener('click', ()=>{
+  if(!openKey) return;
+  const total = workingRows.reduce((s,r)=> s + (parseInt(r.count)||0), 0);
+  document.getElementById('deleteDayText').textContent =
+    `${formatLong(openKey)} — photo et chiffres (${total} repas) seront définitivement supprimés. Vous pourrez reprendre une nouvelle photo avec la bonne date ensuite.`;
+  document.getElementById('deleteDayOverlay').classList.add('open');
+});
+document.getElementById('closeDeleteDay').addEventListener('click', ()=>{
+  document.getElementById('deleteDayOverlay').classList.remove('open');
+});
+document.getElementById('cancelDeleteDayBtn').addEventListener('click', ()=>{
+  document.getElementById('deleteDayOverlay').classList.remove('open');
+});
+document.getElementById('deleteDayOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'deleteDayOverlay') document.getElementById('deleteDayOverlay').classList.remove('open');
+});
+document.getElementById('confirmDeleteDayBtn').addEventListener('click', async ()=>{
+  if(!openKey) return;
+  const keyToDelete = openKey;
+  const ok = await deleteEntry(keyToDelete);
+  document.getElementById('deleteDayOverlay').classList.remove('open');
+  if(ok){
+    delete currentEntries[keyToDelete];
+    closeSheet();
+    showToast('Jour supprimé ✓');
+    await renderRail();
+  }else{
+    showToast('Erreur lors de la suppression');
   }
 });
 
@@ -907,13 +1307,25 @@ async function buildMonthRecap(month){
   const [y, m] = month.split('-').map(Number);
   const monthLabel = `${MONTHS_LONG_FR[m-1]} ${y}`;
 
-  let grandTotal = 0;
+  const labelSet = [];
+  const categoryTotals = {};
+  dates.forEach(d=>{
+    (all[d].rows || []).forEach(r=>{
+      if(!r.label) return;
+      if(!labelSet.includes(r.label)) labelSet.push(r.label);
+      categoryTotals[r.label] = (categoryTotals[r.label]||0) + (parseInt(r.count)||0);
+    });
+  });
+  const grandTotal = Object.values(categoryTotals).reduce((s,v)=> s+v, 0);
+
   let body = `Récap repas — ${monthLabel}\n\n`;
+  body += `TOTAL DU MOIS : ${grandTotal} repas (${dates.length} jour(s) renseigné(s))\n`;
+  labelSet.forEach(l=>{ body += `  • ${l} : ${categoryTotals[l]}\n`; });
+  body += `\nDétail par jour :\n`;
   dates.forEach(d=>{
     const entry = all[d];
     const rows = (entry.rows || []).filter(r=> r.label);
     const total = rows.reduce((s,r)=> s + (parseInt(r.count)||0), 0);
-    grandTotal += total;
     const dayName = DAYS_FR[new Date(d).getDay()] || '';
     body += `${formatShort(d)} (${dayName}) : `;
     body += rows.map(r=> `${r.label} ${r.count||0}`).join(', ');
@@ -921,9 +1333,8 @@ async function buildMonthRecap(month){
     if(entry.note) body += ` [${entry.note}]`;
     body += '\n';
   });
-  body += `\nTotal du mois : ${grandTotal} repas sur ${dates.length} jour(s) renseigné(s).`;
 
-  return {all, dates, monthLabel, body, subject: `Récap repas — ${monthLabel}`};
+  return {all, dates, monthLabel, body, labelSet, categoryTotals, grandTotal, subject: `Récap repas — ${monthLabel}`};
 }
 
 function loadScript(src){
@@ -960,15 +1371,80 @@ async function buildMonthPDF(recap){
   if(!window.jspdf){
     await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
   }
+  if(!window.jspdf.jsPDF.API.autoTable){
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js');
+  }
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({unit:'mm', format:'a4'});
   const pageW = 210, pageH = 297, margin = 15;
+  const blue = [21,101,192];
 
-  doc.setFontSize(18);
-  doc.text(recap.subject, margin, 22);
+  // Bandeau d'en-tête
+  doc.setFillColor(...blue);
+  doc.rect(0, 0, pageW, 34, 'F');
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(19);
+  doc.text('Carnet de repas', margin, 16);
+  doc.setFontSize(12);
+  doc.text(recap.monthLabel.replace(/^./, c=>c.toUpperCase()), margin, 25);
+  doc.setTextColor(0,0,0);
+
+  // Total du mois, mis en avant
   doc.setFontSize(10.5);
-  const bodyLines = doc.splitTextToSize(recap.body, pageW - margin*2);
-  doc.text(bodyLines, margin, 32);
+  doc.setTextColor(100,110,120);
+  doc.setFont(undefined, 'bold');
+  doc.text('TOTAL DU MOIS', margin, 46);
+  doc.setTextColor(13,74,147);
+  doc.setFontSize(32);
+  doc.text(String(recap.grandTotal), margin, 59);
+  doc.setFont(undefined, 'normal');
+  doc.setFontSize(10);
+  doc.setTextColor(100,110,120);
+  doc.text(`repas · ${recap.dates.length} jour(s) renseigné(s)`, margin, 65);
+  doc.setTextColor(0,0,0);
+
+  // Tableau récap par catégorie
+  doc.autoTable({
+    startY: 73,
+    head: [['Catégorie', 'Total du mois']],
+    body: recap.labelSet.map(l=>[l, String(recap.categoryTotals[l])]),
+    theme: 'grid',
+    headStyles: {fillColor: blue, halign:'left'},
+    bodyStyles: {halign:'left', textColor: [20,25,30]},
+    columnStyles: {0:{fontStyle:'bold'}, 1:{halign:'right', fontStyle:'bold'}},
+    margin: {left: margin, right: margin},
+    styles: {fontSize:10.5, cellPadding:4},
+  });
+
+  // Tableau détail jour par jour
+  const dayRows = recap.dates.map(d=>{
+    const entry = recap.all[d];
+    const rows = entry.rows || [];
+    const byLabel = {};
+    rows.forEach(r=>{ byLabel[r.label] = r.count || 0; });
+    const total = rows.reduce((s,r)=> s + (parseInt(r.count)||0), 0);
+    const dayName = DAYS_FR[new Date(d).getDay()] || '';
+    return [
+      `${formatShort(d)}`,
+      dayName,
+      ...recap.labelSet.map(l=> byLabel[l] != null && byLabel[l] !== '' ? String(byLabel[l]) : '—'),
+      String(total)
+    ];
+  });
+
+  doc.autoTable({
+    startY: doc.lastAutoTable.finalY + 10,
+    head: [['Date', 'Jour', ...recap.labelSet, 'Total']],
+    body: dayRows,
+    theme: 'striped',
+    headStyles: {fillColor: blue, fontStyle:'bold'},
+    bodyStyles: {textColor: [20,25,30]},
+    columnStyles: {
+      [recap.labelSet.length + 2]: {halign:'right', fontStyle:'bold'}
+    },
+    margin: {left: margin, right: margin},
+    styles: {fontSize:9, cellPadding:3},
+  });
 
   for(const d of recap.dates){
     const entry = recap.all[d];
@@ -993,17 +1469,31 @@ async function buildMonthPDF(recap){
       doc.text(`Note : ${entry.note}`, margin, 34);
     }
     doc.addImage(compressed, 'JPEG', margin, 40, w, h);
+
+    if(entry.guestPhoto){
+      doc.addPage();
+      const g = await compressForPdf(entry.guestPhoto);
+      let gw = maxW;
+      let gh = (g.h * gw) / g.w;
+      if(gh > maxH){ gh = maxH; gw = (g.w * gh) / g.h; }
+      doc.setFontSize(14);
+      doc.text(`${formatLong(d)} — Liste des invités`, margin, 20);
+      doc.addImage(g.dataUrl, 'JPEG', margin, 30, gw, gh);
+    }
   }
 
   return doc.output('blob');
 }
 
-document.getElementById('emailMonthBtn').addEventListener('click', ()=>{
+function openEmailMonthPicker(presetMonth){
   document.getElementById('settingsOverlay').classList.remove('open');
   const input = document.getElementById('monthPickerInput');
-  input.value = todayKey.slice(0,7);
+  input.value = presetMonth || todayKey.slice(0,7);
   input.max = todayKey.slice(0,7);
   document.getElementById('monthPickerOverlay').classList.add('open');
+}
+document.getElementById('emailMonthBtn').addEventListener('click', ()=>{
+  openEmailMonthPicker();
 });
 document.getElementById('closeMonthPicker').addEventListener('click', ()=>{
   document.getElementById('monthPickerOverlay').classList.remove('open');
@@ -1037,6 +1527,161 @@ document.getElementById('confirmMonthPhotosBtn').addEventListener('click', async
     showToast('Erreur lors de la création du PDF');
   }
 });
+
+function openDeleteMonthPicker(presetMonth){
+  document.getElementById('settingsOverlay').classList.remove('open');
+  const input = document.getElementById('deleteMonthInput');
+  let defaultMonth = presetMonth;
+  if(!defaultMonth){
+    const prevMonthDate = new Date();
+    prevMonthDate.setDate(1);
+    prevMonthDate.setMonth(prevMonthDate.getMonth()-1);
+    defaultMonth = `${prevMonthDate.getFullYear()}-${String(prevMonthDate.getMonth()+1).padStart(2,'0')}`;
+  }
+  input.value = defaultMonth;
+  input.max = todayKey.slice(0,7);
+  document.getElementById('deleteConfirmCheck').checked = false;
+  document.getElementById('confirmDeleteBtn').disabled = true;
+  updateDeleteSummary();
+  document.getElementById('deleteMonthOverlay').classList.add('open');
+}
+document.getElementById('deleteMonthBtn').addEventListener('click', ()=>{
+  openDeleteMonthPicker();
+});
+document.getElementById('closeDeleteMonth').addEventListener('click', ()=>{
+  document.getElementById('deleteMonthOverlay').classList.remove('open');
+});
+document.getElementById('deleteMonthOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'deleteMonthOverlay') document.getElementById('deleteMonthOverlay').classList.remove('open');
+});
+
+async function updateDeleteSummary(){
+  const month = document.getElementById('deleteMonthInput').value;
+  const summaryEl = document.getElementById('deleteSummary');
+  const checkbox = document.getElementById('deleteConfirmCheck');
+  const btn = document.getElementById('confirmDeleteBtn');
+  if(!month){
+    summaryEl.textContent = 'Choisissez un mois pour voir ce qui sera supprimé.';
+    summaryEl.classList.remove('has-data');
+    btn.disabled = true;
+    return;
+  }
+  const all = await getAllEntries();
+  const dates = Object.keys(all).filter(d=> d.startsWith(month));
+  const total = dates.reduce((s,d)=> s + (all[d].rows||[]).reduce((s2,r)=> s2+(parseInt(r.count)||0),0), 0);
+  const [y,m] = month.split('-').map(Number);
+  const label = `${MONTHS_LONG_FR[m-1]} ${y}`;
+  if(dates.length === 0){
+    summaryEl.textContent = `Aucune donnée enregistrée pour ${label} — rien à supprimer.`;
+    summaryEl.classList.remove('has-data');
+    btn.disabled = true;
+  }else{
+    summaryEl.textContent = `${dates.length} jour(s) et ${total} repas seront supprimés pour ${label}, ainsi que toutes les photos associées.`;
+    summaryEl.classList.add('has-data');
+    btn.disabled = !checkbox.checked;
+  }
+}
+
+document.getElementById('deleteMonthInput').addEventListener('input', updateDeleteSummary);
+document.getElementById('deleteConfirmCheck').addEventListener('change', (e)=>{
+  const summaryHasData = document.getElementById('deleteSummary').classList.contains('has-data');
+  document.getElementById('confirmDeleteBtn').disabled = !(e.target.checked && summaryHasData);
+});
+
+document.getElementById('confirmDeleteBtn').addEventListener('click', async ()=>{
+  const month = document.getElementById('deleteMonthInput').value;
+  if(!month || !document.getElementById('deleteConfirmCheck').checked) return;
+  const btn = document.getElementById('confirmDeleteBtn');
+  btn.disabled = true;
+  btn.textContent = 'Suppression…';
+  const all = await getAllEntries();
+  const dates = Object.keys(all).filter(d=> d.startsWith(month));
+  let okCount = 0;
+  for(const d of dates){
+    const ok = await deleteEntry(d);
+    if(ok) okCount++;
+  }
+  btn.textContent = '🗑️ Supprimer définitivement ce mois';
+  document.getElementById('deleteMonthOverlay').classList.remove('open');
+  showToast(`${okCount} jour(s) supprimé(s) ✓`);
+  await renderRail();
+});
+
+document.getElementById('oldMonthEmailBtn').addEventListener('click', ()=>{
+  const month = document.getElementById('oldMonthBanner').dataset.month;
+  openEmailMonthPicker(month);
+});
+document.getElementById('oldMonthDeleteBtn').addEventListener('click', ()=>{
+  const month = document.getElementById('oldMonthBanner').dataset.month;
+  openDeleteMonthPicker(month);
+});
+
+let calYear, calMonth; // calMonth: 1-12
+{
+  const [y, m] = todayKey.slice(0,7).split('-').map(Number);
+  calYear = y; calMonth = m;
+}
+document.getElementById('calPrevBtn').addEventListener('click', ()=>{
+  calMonth -= 1;
+  if(calMonth < 1){ calMonth = 12; calYear -= 1; }
+  renderCalendarGrid();
+});
+document.getElementById('calNextBtn').addEventListener('click', ()=>{
+  const currentMonthKey = todayKey.slice(0,7);
+  const thisCalKey = `${calYear}-${String(calMonth).padStart(2,'0')}`;
+  if(thisCalKey >= currentMonthKey) return; // pas de mois futur
+  calMonth += 1;
+  if(calMonth > 12){ calMonth = 1; calYear += 1; }
+  renderCalendarGrid();
+});
+
+function renderCalendarGrid(){
+  const label = `${MONTHS_LONG_FR[calMonth-1]} ${calYear}`;
+  document.getElementById('calMonthLabel').textContent = label;
+
+  const currentMonthKey = todayKey.slice(0,7);
+  const thisCalKey = `${calYear}-${String(calMonth).padStart(2,'0')}`;
+  document.getElementById('calNextBtn').style.visibility = (thisCalKey >= currentMonthKey) ? 'hidden' : 'visible';
+
+  const firstDay = new Date(calYear, calMonth-1, 1);
+  const startOffset = (firstDay.getDay() + 6) % 7; // 0 = lundi
+  const daysInMonth = new Date(calYear, calMonth, 0).getDate();
+
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+  for(let i=0; i<startOffset; i++){
+    const empty = document.createElement('div');
+    empty.className = 'cal-cell empty';
+    grid.appendChild(empty);
+  }
+
+  for(let day=1; day<=daysInMonth; day++){
+    const dateStr = `${thisCalKey}-${String(day).padStart(2,'0')}`;
+    const cell = document.createElement('div');
+    cell.className = 'cal-cell';
+    const entry = currentEntries[dateStr];
+    const hasCounts = entry && entry.rows && entry.rows.some(r=> r.count !== '' && r.count != null && parseInt(r.count) > 0);
+    const isFuture = dateStr > todayKey;
+
+    if(hasCounts) cell.classList.add('done');
+    else if(isFuture) cell.classList.add('future');
+    else cell.classList.add('missing');
+
+    if(dateStr === todayKey) cell.classList.add('today');
+    cell.textContent = day;
+
+    if(entry){
+      cell.addEventListener('click', ()=>{
+        openSheet(dateStr);
+      });
+    }else if(!isFuture){
+      cell.addEventListener('click', ()=>{
+        showToast('Aucune photo pour ce jour');
+      });
+    }
+    grid.appendChild(cell);
+  }
+}
 
 document.getElementById('gearBtn').addEventListener('click', ()=>{
   document.getElementById('settingsOverlay').classList.add('open');
