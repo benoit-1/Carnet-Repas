@@ -117,6 +117,21 @@
   }
   .omb-btn.danger{background:#C1584A;color:#fff;border:none;}
 
+  .send-reminder-banner{
+    margin:14px 20px 0;
+    background:#FBF1EF;
+    border:1px solid #F0D3CE;
+    border-radius:var(--radius);
+    padding:13px 15px;
+  }
+  .srb-text{
+    font-size:12.5px;color:#8A3226;line-height:1.5;margin:0 0 10px;
+  }
+  .srb-btn{
+    width:100%;border:none;border-radius:9px;padding:10px;font-size:12.5px;font-weight:600;
+    font-family:'DM Sans';cursor:pointer;background:#C1584A;color:#fff;
+  }
+
   .cal-nav{
     display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;
   }
@@ -499,6 +514,11 @@
     </div>
   </div>
 
+  <div class="send-reminder-banner" id="sendReminderBanner" style="display:none;">
+    <p class="srb-text" id="sendReminderText"></p>
+    <button class="srb-btn" id="sendReminderBtn">📧 Envoyer le récap maintenant</button>
+  </div>
+
   <button class="todayCard" id="todayCard">
     <span class="icon">📸</span>
     <span class="txt">
@@ -601,8 +621,11 @@
     </p>
 
     <button class="add-row" id="emailMonthBtn" style="margin-bottom:8px;">📧 Récap du mois par email</button>
-    <button class="add-row" id="exportCsvBtn" style="margin-bottom:8px;">📊 Récap chiffres (fichier Excel/CSV)</button>
-    <button class="add-row" id="exportBackupBtn" style="margin-bottom:16px;">🗂️ Sauvegarde complète (avec photos)</button>
+    <button class="add-row" id="exportCsvBtn" style="margin-bottom:16px;">📊 Récap chiffres (fichier Excel/CSV)</button>
+
+    <div style="border-top:1px solid var(--line); margin: 4px 0 10px;"></div>
+    <p style="font-size:11px; color:var(--ink-muted); margin:0 0 8px;">Avancé — fichier technique, pas fait pour être lu ni envoyé à quelqu'un</p>
+    <button class="add-row" id="exportBackupBtn" style="margin-bottom:16px;">⚙️ Sauvegarde technique (fichier de secours)</button>
 
     <div style="border-top:1px solid var(--line); margin: 4px 0 14px;"></div>
     <button class="add-row" id="deleteMonthBtn" style="color:#C1584A; border-color:#F0D3CE;">🗑️ Supprimer un mois</button>
@@ -843,6 +866,7 @@ async function renderRail(){
     renderCalendarGrid();
     updateAppBadge();
     updatePulseState();
+    updateSendReminder();
     return;
   }
   document.getElementById('emptyState').style.display = 'none';
@@ -857,6 +881,7 @@ async function renderRail(){
   renderCalendarGrid();
   updateAppBadge();
   updatePulseState();
+  updateSendReminder();
 
   railEl.innerHTML = '';
   dateKeys.forEach(k=>{
@@ -943,6 +968,39 @@ document.getElementById('offDutyToggle').addEventListener('click', async ()=>{
     showToast('Erreur — réessayez');
   }
 });
+
+function getSentMonths(){
+  try{ return JSON.parse(localStorage.getItem('cr_sent_months') || '[]'); }catch(e){ return []; }
+}
+function markMonthSent(month){
+  try{
+    const list = getSentMonths();
+    if(!list.includes(month)){
+      list.push(month);
+      localStorage.setItem('cr_sent_months', JSON.stringify(list));
+    }
+  }catch(e){ /* pas critique */ }
+}
+
+const SEND_REMINDER_DAY = 18;
+
+function updateSendReminder(){
+  const banner = document.getElementById('sendReminderBanner');
+  const day = new Date().getDate();
+  if(day < SEND_REMINDER_DAY){ banner.style.display = 'none'; return; }
+
+  const monthKey = todayKey.slice(0,7);
+  const hasData = Object.keys(currentEntries).some(d=> d.startsWith(monthKey));
+  if(!hasData){ banner.style.display = 'none'; return; }
+
+  if(getSentMonths().includes(monthKey)){ banner.style.display = 'none'; return; }
+
+  const [y, m] = monthKey.split('-').map(Number);
+  document.getElementById('sendReminderText').textContent =
+    `Nous sommes le ${day} — le récap de ${MONTHS_LONG_FR[m-1]} ${y} n'a pas encore été envoyé.`;
+  banner.dataset.month = monthKey;
+  banner.style.display = 'block';
+}
 
 function updateOldMonthBanner(){
   const [cy, cm] = todayKey.slice(0,7).split('-').map(Number);
@@ -1502,6 +1560,8 @@ document.getElementById('confirmMonthBtn').addEventListener('click', async ()=>{
   const mailtoUrl = `mailto:?subject=${encodeURIComponent(recap.subject)}&body=${encodeURIComponent(recap.body)}`;
   window.location.href = mailtoUrl;
   document.getElementById('monthPickerOverlay').classList.remove('open');
+  markMonthSent(month);
+  updateSendReminder();
 });
 
 document.getElementById('confirmMonthPhotosBtn').addEventListener('click', async ()=>{
@@ -1514,6 +1574,8 @@ document.getElementById('confirmMonthPhotosBtn').addEventListener('click', async
     const pdfBlob = await buildMonthPDF(recap);
     document.getElementById('monthPickerOverlay').classList.remove('open');
     await shareOrDownload(pdfBlob, `recap-repas-${month}.pdf`, 'application/pdf', recap.subject);
+    markMonthSent(month);
+    updateSendReminder();
   }catch(e){
     console.error(e);
     showToast('Erreur lors de la création du PDF');
@@ -1606,6 +1668,11 @@ document.getElementById('oldMonthEmailBtn').addEventListener('click', ()=>{
 document.getElementById('oldMonthDeleteBtn').addEventListener('click', ()=>{
   const month = document.getElementById('oldMonthBanner').dataset.month;
   openDeleteMonthPicker(month);
+});
+
+document.getElementById('sendReminderBtn').addEventListener('click', ()=>{
+  const month = document.getElementById('sendReminderBanner').dataset.month;
+  openEmailMonthPicker(month);
 });
 
 function mondayOf(d){
