@@ -1377,75 +1377,66 @@ async function buildMonthPDF(recap){
   }
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({unit:'mm', format:'a4'});
-  const pageW = 210, pageH = 297, margin = 15;
+  const pageW = 210, pageH = 297, margin = 18;
   const blue = [21,101,192];
+  const dark = [30,43,51];
+  const tableW = pageW - margin*2;
 
-  // Bandeau d'en-tête
-  doc.setFillColor(...blue);
-  doc.rect(0, 0, pageW, 34, 'F');
-  doc.setTextColor(255,255,255);
-  doc.setFontSize(19);
-  doc.text('Carnet de repas', margin, 16);
-  doc.setFontSize(12);
-  doc.text(recap.monthLabel.replace(/^./, c=>c.toUpperCase()), margin, 25);
-  doc.setTextColor(0,0,0);
-
-  // Total du mois, mis en avant
-  doc.setFontSize(10.5);
-  doc.setTextColor(100,110,120);
+  // En-tête centré, façon Repas Manager
+  doc.setTextColor(...blue);
   doc.setFont(undefined, 'bold');
-  doc.text('TOTAL DU MOIS', margin, 46);
-  doc.setTextColor(13,74,147);
-  doc.setFontSize(32);
-  doc.text(String(recap.grandTotal), margin, 59);
+  doc.setFontSize(13);
+  doc.text('Repas Manager', pageW/2, 20, {align:'center'});
+
+  doc.setTextColor(100,110,120);
   doc.setFont(undefined, 'normal');
   doc.setFontSize(10);
-  doc.setTextColor(100,110,120);
-  doc.text(`repas · ${recap.dates.length} jour(s) renseigné(s)`, margin, 65);
-  doc.setTextColor(0,0,0);
+  doc.text(formatLong(todayKey), pageW/2, 26, {align:'center'});
 
-  // Tableau récap par catégorie
-  doc.autoTable({
-    startY: 73,
-    head: [['Catégorie', 'Total du mois']],
-    body: recap.labelSet.map(l=>[l, String(recap.categoryTotals[l])]),
-    theme: 'grid',
-    headStyles: {fillColor: blue, halign:'left'},
-    bodyStyles: {halign:'left', textColor: [20,25,30]},
-    columnStyles: {0:{fontStyle:'bold'}, 1:{halign:'right', fontStyle:'bold'}},
-    margin: {left: margin, right: margin},
-    styles: {fontSize:10.5, cellPadding:4},
-  });
+  doc.setTextColor(...blue);
+  doc.setFont(undefined, 'bold');
+  doc.setFontSize(17);
+  doc.text(`Carnet de repas — ${recap.monthLabel.replace(/^./, c=>c.toUpperCase())}`, pageW/2, 35, {align:'center'});
+  doc.setFont(undefined, 'normal');
 
-  // Tableau détail jour par jour
+  doc.setDrawColor(...blue);
+  doc.setLineWidth(0.6);
+  doc.line(margin, 40, pageW - margin, 40);
+
+  function sectionBox(title, rows, startY){
+    doc.autoTable({
+      startY,
+      head: [[title]],
+      body: [],
+      theme: 'grid',
+      headStyles: {fillColor:[255,255,255], textColor: dark, halign:'center', fontStyle:'bold', lineWidth:0.45, lineColor: dark, fontSize:9.5},
+      margin: {left: margin, right: margin},
+      tableWidth: tableW,
+    });
+    doc.autoTable({
+      startY: doc.lastAutoTable.finalY,
+      body: rows,
+      theme: 'grid',
+      bodyStyles: {textColor: dark, lineWidth:0.3, lineColor: dark, fontSize:9.5, cellPadding:4},
+      columnStyles: {0:{cellWidth: tableW - 45}, 1:{cellWidth:45, halign:'center', fontStyle:'bold'}},
+      margin: {left: margin, right: margin},
+      tableWidth: tableW,
+    });
+    return doc.lastAutoTable.finalY + 10;
+  }
+
+  let y = 48;
+  y = sectionBox('TOTAL DU MOIS', [['Repas (toutes catégories)', String(recap.grandTotal)]], y);
+  y = sectionBox('PAR CATÉGORIE', recap.labelSet.map(l=>[l, String(recap.categoryTotals[l])]), y);
+
   const dayRows = recap.dates.map(d=>{
     const entry = recap.all[d];
     const rows = entry.rows || [];
-    const byLabel = {};
-    rows.forEach(r=>{ byLabel[r.label] = r.count || 0; });
     const total = rows.reduce((s,r)=> s + (parseInt(r.count)||0), 0);
     const dayName = DAYS_FR[new Date(d).getDay()] || '';
-    return [
-      `${formatShort(d)}`,
-      dayName,
-      ...recap.labelSet.map(l=> byLabel[l] != null && byLabel[l] !== '' ? String(byLabel[l]) : '—'),
-      String(total)
-    ];
+    return [`${formatShort(d)} — ${dayName}`, String(total)];
   });
-
-  doc.autoTable({
-    startY: doc.lastAutoTable.finalY + 10,
-    head: [['Date', 'Jour', ...recap.labelSet, 'Total']],
-    body: dayRows,
-    theme: 'striped',
-    headStyles: {fillColor: blue, fontStyle:'bold'},
-    bodyStyles: {textColor: [20,25,30]},
-    columnStyles: {
-      [recap.labelSet.length + 2]: {halign:'right', fontStyle:'bold'}
-    },
-    margin: {left: margin, right: margin},
-    styles: {fontSize:9, cellPadding:3},
-  });
+  sectionBox('DÉTAIL PAR JOUR', dayRows, y);
 
   for(const d of recap.dates){
     const entry = recap.all[d];
