@@ -237,6 +237,20 @@
 
   .rail{padding:0 20px;display:flex;flex-direction:column;gap:10px;}
 
+  .month-divider{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:14px 4px 6px;
+    font-family:'Fredoka',sans-serif;font-weight:600;font-size:13px;color:var(--ink);
+    text-transform:capitalize;
+    border-top:1px solid var(--line);
+    margin-top:4px;
+  }
+  .month-divider:first-child{border-top:none;margin-top:0;padding-top:0;}
+  .month-divider-total{
+    font-family:'JetBrains Mono',monospace;font-weight:600;font-size:12px;color:var(--board);
+    text-transform:none;
+  }
+
   .ticket{
     background:var(--card);
     border-radius:12px;
@@ -459,6 +473,23 @@
     width:100%;border:1px solid var(--line);border-radius:10px;background:var(--card);
     padding:10px;font-family:'DM Sans';font-size:14px;color:var(--ink);outline:none;
   }
+
+  .email-book-row{
+    display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);
+    border-radius:9px;padding:8px 10px;margin-bottom:6px;
+  }
+  .email-book-row .name{font-weight:600;font-size:12.5px;color:var(--ink);}
+  .email-book-row .addr{font-size:11.5px;color:var(--ink-muted);flex:1;}
+  .email-book-row .del{background:none;border:none;color:#C1584A;font-size:14px;cursor:pointer;padding:2px 4px;}
+  .email-book-empty{font-size:12px;color:var(--ink-muted);padding:4px 2px;}
+
+  .recipient-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+  .recipient-chip{
+    border:1px solid var(--line);background:var(--card);border-radius:999px;
+    padding:7px 12px;font-size:12px;color:var(--ink);cursor:pointer;
+  }
+  .recipient-chip.active{background:var(--board);color:#fff;border-color:var(--board);}
+
   .settings-help{
     font-size:12.5px;color:var(--ink-muted);line-height:1.5;margin:14px 0;
     background:var(--card);border-radius:10px;padding:12px;border:1px solid var(--line);
@@ -616,9 +647,17 @@
       <button class="close-btn" id="closeSettings">✕</button>
     </div>
 
-    <p class="settings-help">
+    <p class="settings-help" id="settingsHelpText">
       Toutes vos données (photos et chiffres) sont enregistrées <strong>directement sur cet appareil</strong>, dans le navigateur — rien à configurer, rien envoyé ailleurs.
     </p>
+
+    <p class="field-label" style="margin-top:0;">Carnet d'adresses (destinataires à choisir à l'envoi)</p>
+    <div id="emailBookList" style="margin-bottom:8px;"></div>
+    <div style="display:flex; gap:6px; margin-bottom:16px;">
+      <input class="field-input" id="emailBookName" placeholder="Nom (ex : Direction)" style="flex:1;">
+      <input class="field-input" id="emailBookEmail" type="email" placeholder="Adresse email" style="flex:1.4;">
+      <button class="btn save" id="emailBookAddBtn" style="flex:0 0 44px; padding:0;">+</button>
+    </div>
 
     <button class="add-row" id="emailMonthBtn" style="margin-bottom:8px;">📧 Récap du mois par email</button>
     <button class="add-row" id="exportCsvBtn" style="margin-bottom:16px;">📊 Récap chiffres (fichier Excel/CSV)</button>
@@ -626,6 +665,28 @@
     <div style="border-top:1px solid var(--line); margin: 4px 0 10px;"></div>
     <p style="font-size:11px; color:var(--ink-muted); margin:0 0 8px;">Avancé — fichier technique, pas fait pour être lu ni envoyé à quelqu'un</p>
     <button class="add-row" id="exportBackupBtn" style="margin-bottom:16px;">⚙️ Sauvegarde technique (fichier de secours)</button>
+
+    <div style="border-top:1px solid var(--line); margin: 4px 0 10px;"></div>
+    <p style="font-size:11px; color:var(--ink-muted); margin:0 0 8px;">Stockage partagé (optionnel) — d'autres personnes avec le code d'accès pourront consulter les mêmes données</p>
+
+    <p class="field-label" style="margin-top:0;">Propriétaire (utilisateur GitHub)</p>
+    <input class="field-input" id="ghOwner" placeholder="ex : benoit-1">
+
+    <p class="field-label">Nom du dépôt (privé, dédié aux données)</p>
+    <input class="field-input" id="ghRepo" placeholder="ex : carnet-repas-data">
+
+    <p class="field-label">Branche</p>
+    <input class="field-input" id="ghBranch" placeholder="main" value="main">
+
+    <p class="field-label">Code d'accès (jeton GitHub)</p>
+    <input class="field-input" id="ghToken" type="password" placeholder="github_pat_...">
+
+    <div class="settings-status" id="settingsStatus"></div>
+
+    <div class="actions" style="margin-top:14px;">
+      <button class="btn save" id="testSettingsBtn" style="flex:1;">Connecter</button>
+    </div>
+    <button class="add-row" id="revertLocalBtn" style="margin-top:10px;margin-bottom:16px;">Revenir au stockage local</button>
 
     <div style="border-top:1px solid var(--line); margin: 4px 0 14px;"></div>
     <button class="add-row" id="deleteMonthBtn" style="color:#C1584A; border-color:#F0D3CE;">🗑️ Supprimer un mois</button>
@@ -681,6 +742,8 @@
     <div class="date-picker-body">
       <p class="hint">Choisissez le mois à récapituler — le récap s'ouvrira dans l'app Mail, prêt à envoyer.</p>
       <input type="month" class="date-input" id="monthPickerInput">
+      <p class="field-label" style="margin-top:0;">Destinataire (optionnel)</p>
+      <div class="recipient-chips" id="recipientChips"></div>
       <button class="btn save" id="confirmMonthBtn" style="width:100%;margin-bottom:8px;">📧 Chiffres par email</button>
       <button class="add-row" id="confirmMonthPhotosBtn" style="width:100%;">🖼️ Chiffres + photos (PDF compressé)</button>
     </div>
@@ -771,7 +834,70 @@ async function idbDelete(key){
 }
 const hasClaudeStorage = typeof window.storage !== 'undefined' && window.storage !== null;
 
+const GH = {
+  owner: localStorage.getItem('cr_gh_owner') || '',
+  repo: localStorage.getItem('cr_gh_repo') || '',
+  branch: localStorage.getItem('cr_gh_branch') || 'main',
+  token: localStorage.getItem('cr_gh_token') || '',
+};
+function ghConfigured(){ return !!(GH.owner && GH.repo && GH.token); }
+
+function b64EncodeUnicode(str){
+  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (m,p)=>String.fromCharCode('0x'+p)));
+}
+function b64DecodeUnicode(str){
+  return decodeURIComponent(atob(str).split('').map(c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+}
+async function ghFetch(path, options={}){
+  const url = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${path}`;
+  return fetch(url, {
+    method: options.method || 'GET',
+    headers: {
+      'Authorization': `Bearer ${GH.token}`,
+      'Accept': 'application/vnd.github+json',
+      ...(options.body ? {'Content-Type':'application/json'} : {})
+    },
+    body: options.body ? JSON.stringify(options.body) : undefined
+  });
+}
+async function ghGetFile(path){
+  const res = await ghFetch(`${path}?ref=${GH.branch}`);
+  if(res.status === 404) return null;
+  if(!res.ok) throw new Error('GitHub '+res.status);
+  const data = await res.json();
+  return {content: JSON.parse(b64DecodeUnicode(data.content.replace(/\n/g,''))), sha: data.sha};
+}
+async function ghPutFile(path, obj, sha){
+  const body = {
+    message: `maj ${path}`,
+    content: b64EncodeUnicode(JSON.stringify(obj)),
+    branch: GH.branch,
+  };
+  if(sha) body.sha = sha;
+  const res = await ghFetch(path, {method:'PUT', body});
+  if(!res.ok) throw new Error('GitHub '+res.status);
+  return res.json();
+}
+async function ghDeleteFile(path){
+  const existing = await ghGetFile(path);
+  if(!existing) return true;
+  const res = await ghFetch(path, {method:'DELETE', body:{message:`suppr ${path}`, sha: existing.sha, branch: GH.branch}});
+  return res.ok;
+}
+async function ghListDir(path){
+  const res = await ghFetch(`${path}?ref=${GH.branch}`);
+  if(res.status === 404) return [];
+  if(!res.ok) throw new Error('GitHub '+res.status);
+  return res.json();
+}
+
 async function loadEntry(key){
+  if(ghConfigured()){
+    try{
+      const f = await ghGetFile(`entries/${key}.json`);
+      return f ? f.content : null;
+    }catch(e){ console.error(e); return null; }
+  }
   if(hasClaudeStorage){
     try{
       const res = await window.storage.get('entry:'+key, false);
@@ -783,6 +909,13 @@ async function loadEntry(key){
   try{ return await idbGet(key); }catch(e){ console.error(e); return null; }
 }
 async function saveEntry(key, entry){
+  if(ghConfigured()){
+    try{
+      const existing = await ghGetFile(`entries/${key}.json`);
+      await ghPutFile(`entries/${key}.json`, entry, existing ? existing.sha : undefined);
+      return true;
+    }catch(e){ console.error(e); return false; }
+  }
   if(hasClaudeStorage){
     try{
       await window.storage.set('entry:'+key, JSON.stringify(entry), false);
@@ -795,6 +928,13 @@ async function saveEntry(key, entry){
   try{ await idbSet(key, entry); return true; }catch(e){ console.error(e); return false; }
 }
 async function listKeys(){
+  if(ghConfigured()){
+    try{
+      const files = await ghListDir('entries');
+      if(!Array.isArray(files)) return [];
+      return files.filter(f=>f.name.endsWith('.json')).map(f=>'entry:'+f.name.replace('.json',''));
+    }catch(e){ console.error(e); return []; }
+  }
   if(hasClaudeStorage){
     try{
       const res = await window.storage.list('entry:', false);
@@ -809,6 +949,9 @@ async function listKeys(){
   }catch(e){ console.error(e); return []; }
 }
 async function deleteEntry(key){
+  if(ghConfigured()){
+    try{ return await ghDeleteFile(`entries/${key}.json`); }catch(e){ console.error(e); return false; }
+  }
   if(hasClaudeStorage){
     try{
       await window.storage.delete('entry:'+key, false);
@@ -821,7 +964,10 @@ async function deleteEntry(key){
 function updateModeBadge(){
   const badge = document.getElementById('modeBadge');
   const text = document.getElementById('modeText');
-  if(hasClaudeStorage){
+  if(ghConfigured()){
+    badge.classList.remove('local');
+    text.textContent = `Partagé · ${GH.owner}/${GH.repo}`;
+  }else if(hasClaudeStorage){
     badge.classList.remove('local');
     text.textContent = 'Stockage Claude';
   }else{
@@ -884,9 +1030,24 @@ async function renderRail(){
   updateSendReminder();
 
   railEl.innerHTML = '';
+  let lastMonthKey = null;
   dateKeys.forEach(k=>{
     const entry = currentEntries[k];
     if(!entry) return;
+
+    const monthKey = k.slice(0,7);
+    if(monthKey !== lastMonthKey){
+      lastMonthKey = monthKey;
+      const [my, mm] = monthKey.split('-').map(Number);
+      const monthTotal = dateKeys
+        .filter(d => d.startsWith(monthKey) && currentEntries[d])
+        .reduce((s,d)=> s + (currentEntries[d].rows||[]).reduce((s2,r)=> s2+(parseInt(r.count)||0),0), 0);
+      const divider = document.createElement('div');
+      divider.className = 'month-divider';
+      divider.innerHTML = `<span>${MONTHS_FR[mm-1]} ${my}</span><span class="month-divider-total">${monthTotal} repas</span>`;
+      railEl.appendChild(divider);
+    }
+
     const hasCounts = entry.rows && entry.rows.some(r=>r.count !== '' && r.count != null);
     const total = (entry.rows||[]).reduce((s,r)=> s + (parseInt(r.count)||0), 0);
     const div = document.createElement('div');
@@ -1093,6 +1254,16 @@ function updateTotal(){
   document.getElementById('totalNum').textContent = total;
 }
 
+function syncRowsFromDOM(){
+  const wrap = document.getElementById('rowsWrap');
+  const labelInputs = Array.from(wrap.querySelectorAll('.label'));
+  const countInputs = Array.from(wrap.querySelectorAll('.count'));
+  workingRows = labelInputs.map((inp, i) => ({
+    label: inp.value,
+    count: countInputs[i] ? countInputs[i].value : ''
+  }));
+}
+
 async function openSheet(key){
   openKey = key;
   const entry = currentEntries[key] || await loadEntry(key);
@@ -1238,6 +1409,7 @@ document.getElementById('cameraInput').addEventListener('change', async (e)=>{
 
 document.getElementById('saveBtn').addEventListener('click', async ()=>{
   if(!openKey) return;
+  syncRowsFromDOM();
   const entry = currentEntries[openKey] || await loadEntry(openKey);
   entry.rows = workingRows.filter(r=> r.label.trim() !== '' || r.count !== '');
   entry.note = document.getElementById('noteField').value;
@@ -1253,6 +1425,7 @@ document.getElementById('saveBtn').addEventListener('click', async ()=>{
 
 document.getElementById('copyBtn').addEventListener('click', async ()=>{
   if(!openKey) return;
+  syncRowsFromDOM();
   const total = workingRows.reduce((s,r)=> s + (parseInt(r.count)||0), 0);
   let text = `${formatLong(openKey)}\n`;
   workingRows.forEach(r=>{ if(r.label) text += `${r.label} : ${r.count || 0}\n`; });
@@ -1269,6 +1442,7 @@ document.getElementById('copyBtn').addEventListener('click', async ()=>{
 
 document.getElementById('deleteDayBtn').addEventListener('click', ()=>{
   if(!openKey) return;
+  syncRowsFromDOM();
   const total = workingRows.reduce((s,r)=> s + (parseInt(r.count)||0), 0);
   document.getElementById('deleteDayText').textContent =
     `${formatLong(openKey)} — photo et chiffres (${total} repas) seront définitivement supprimés. Vous pourrez reprendre une nouvelle photo avec la bonne date ensuite.`;
@@ -1496,6 +1670,20 @@ async function buildMonthPDF(recap){
   });
   sectionBox('DÉTAIL PAR JOUR', dayRows, y);
 
+  // Page de séparation avant les photos, seulement s'il y en a
+  const hasAnyPhoto = recap.dates.some(d => recap.all[d].photo);
+  if(hasAnyPhoto){
+    doc.addPage();
+    doc.setTextColor(...blue);
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(20);
+    doc.text('Détail', pageW/2, pageH/2 - 8, {align:'center'});
+    doc.setFontSize(13);
+    doc.setTextColor(100,110,120);
+    doc.setFont(undefined, 'normal');
+    doc.text('Photos des listes du mois, jour par jour', pageW/2, pageH/2 + 2, {align:'center'});
+  }
+
   for(const d of recap.dates){
     const entry = recap.all[d];
     if(!entry.photo) continue;
@@ -1511,7 +1699,11 @@ async function buildMonthPDF(recap){
     const total = rows.reduce((s,r)=> s + (parseInt(r.count)||0),0);
 
     doc.setFontSize(14);
+    doc.setTextColor(...blue);
+    doc.setFont(undefined, 'bold');
     doc.text(formatLong(d), margin, 20);
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(...dark);
     doc.setFontSize(11);
     doc.text(rows.map(r=>`${r.label}: ${r.count||0}`).join('   ') + `   —   Total: ${total}`, margin, 28);
     if(entry.note){
@@ -1527,7 +1719,11 @@ async function buildMonthPDF(recap){
       let gh = (g.h * gw) / g.w;
       if(gh > maxH){ gh = maxH; gw = (g.w * gh) / g.h; }
       doc.setFontSize(14);
+      doc.setTextColor(...blue);
+      doc.setFont(undefined, 'bold');
       doc.text(`${formatLong(d)} — Liste des invités`, margin, 20);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(...dark);
       doc.addImage(g.dataUrl, 'JPEG', margin, 30, gw, gh);
     }
   }
@@ -1540,6 +1736,7 @@ function openEmailMonthPicker(presetMonth){
   const input = document.getElementById('monthPickerInput');
   input.value = presetMonth || todayKey.slice(0,7);
   input.max = todayKey.slice(0,7);
+  renderRecipientChips();
   document.getElementById('monthPickerOverlay').classList.add('open');
 }
 document.getElementById('emailMonthBtn').addEventListener('click', ()=>{
@@ -1557,7 +1754,7 @@ document.getElementById('confirmMonthBtn').addEventListener('click', async ()=>{
   if(!month){ showToast('Choisissez un mois'); return; }
   const recap = await buildMonthRecap(month);
   if(!recap){ showToast('Aucune donnée pour ce mois'); return; }
-  const mailtoUrl = `mailto:?subject=${encodeURIComponent(recap.subject)}&body=${encodeURIComponent(recap.body)}`;
+  const mailtoUrl = `mailto:${encodeURIComponent(selectedRecipient)}?subject=${encodeURIComponent(recap.subject)}&body=${encodeURIComponent(recap.body)}`;
   window.location.href = mailtoUrl;
   document.getElementById('monthPickerOverlay').classList.remove('open');
   markMonthSent(month);
@@ -1742,7 +1939,95 @@ function renderCalendarGrid(){
   }
 }
 
+function updateSettingsHelpText(){
+  const el = document.getElementById('settingsHelpText');
+  if(ghConfigured()){
+    el.innerHTML = `Vos données (photos et chiffres) sont enregistrées sur un <strong>espace partagé</strong> — toute personne avec le code d'accès ci-dessous peut consulter les mêmes données, depuis n'importe quel appareil.`;
+  }else{
+    el.innerHTML = `Toutes vos données (photos et chiffres) sont enregistrées <strong>directement sur cet appareil</strong>, dans le navigateur — rien à configurer, rien envoyé ailleurs.`;
+  }
+}
+
+function getEmailBook(){
+  try{ return JSON.parse(localStorage.getItem('cr_email_book') || '[]'); }catch(e){ return []; }
+}
+function saveEmailBook(list){
+  try{ localStorage.setItem('cr_email_book', JSON.stringify(list)); }catch(e){ /* pas critique */ }
+}
+function renderEmailBookList(){
+  const wrap = document.getElementById('emailBookList');
+  const book = getEmailBook();
+  if(book.length === 0){
+    wrap.innerHTML = `<p class="email-book-empty">Aucun destinataire enregistré pour l'instant.</p>`;
+    return;
+  }
+  wrap.innerHTML = book.map((c, i) => `
+    <div class="email-book-row">
+      <span class="name">${c.name || 'Sans nom'}</span>
+      <span class="addr">${c.email}</span>
+      <button class="del" data-i="${i}">✕</button>
+    </div>
+  `).join('');
+  wrap.querySelectorAll('.del').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const i = parseInt(btn.dataset.i);
+      const book2 = getEmailBook();
+      book2.splice(i,1);
+      saveEmailBook(book2);
+      renderEmailBookList();
+      renderRecipientChips();
+    });
+  });
+}
+
+let selectedRecipient = '';
+let recipientExplicitlyOther = false;
+
+function renderRecipientChips(){
+  const wrap = document.getElementById('recipientChips');
+  const book = getEmailBook();
+  if(book.length === 0){
+    wrap.innerHTML = `<span style="font-size:12px;color:var(--ink-muted);">Aucun destinataire enregistré — vous pourrez taper l'adresse directement dans Mail, ou en ajouter un dans ⚙️ Réglages.</span>`;
+    selectedRecipient = '';
+    return;
+  }
+  if(!recipientExplicitlyOther && !book.some(c=>c.email === selectedRecipient)) selectedRecipient = book[0].email;
+  const chips = book.map(c=>`
+    <button type="button" class="recipient-chip ${c.email===selectedRecipient && !recipientExplicitlyOther ?'active':''}" data-email="${c.email}">${c.name || c.email}</button>
+  `).join('');
+  const otherChip = `<button type="button" class="recipient-chip ${recipientExplicitlyOther?'active':''}" data-email="">✏️ Autre adresse</button>`;
+  wrap.innerHTML = chips + otherChip;
+  wrap.querySelectorAll('.recipient-chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      selectedRecipient = chip.dataset.email;
+      recipientExplicitlyOther = (chip.dataset.email === '');
+      renderRecipientChips();
+    });
+  });
+}
+
+document.getElementById('emailBookAddBtn').addEventListener('click', ()=>{
+  const name = document.getElementById('emailBookName').value.trim();
+  const email = document.getElementById('emailBookEmail').value.trim();
+  if(!email){ showToast('Entrez une adresse email'); return; }
+  const book = getEmailBook();
+  book.push({name, email});
+  saveEmailBook(book);
+  document.getElementById('emailBookName').value = '';
+  document.getElementById('emailBookEmail').value = '';
+  renderEmailBookList();
+  renderRecipientChips();
+  showToast('Destinataire ajouté ✓');
+});
+
 document.getElementById('gearBtn').addEventListener('click', ()=>{
+  document.getElementById('ghOwner').value = GH.owner;
+  document.getElementById('ghRepo').value = GH.repo;
+  document.getElementById('ghBranch').value = GH.branch || 'main';
+  document.getElementById('ghToken').value = GH.token;
+  renderEmailBookList();
+  document.getElementById('settingsStatus').className = 'settings-status';
+  updateSettingsHelpText();
   document.getElementById('settingsOverlay').classList.add('open');
 });
 document.getElementById('closeSettings').addEventListener('click', ()=>{
@@ -1750,6 +2035,60 @@ document.getElementById('closeSettings').addEventListener('click', ()=>{
 });
 document.getElementById('settingsOverlay').addEventListener('click', (e)=>{
   if(e.target.id === 'settingsOverlay') document.getElementById('settingsOverlay').classList.remove('open');
+});
+
+document.getElementById('testSettingsBtn').addEventListener('click', async ()=>{
+  const owner = document.getElementById('ghOwner').value.trim();
+  const repo = document.getElementById('ghRepo').value.trim();
+  const branch = document.getElementById('ghBranch').value.trim() || 'main';
+  const token = document.getElementById('ghToken').value.trim();
+  const statusEl = document.getElementById('settingsStatus');
+  if(!owner || !repo || !token){
+    statusEl.className = 'settings-status err';
+    statusEl.textContent = 'Merci de remplir propriétaire, dépôt et code d\'accès.';
+    return;
+  }
+  statusEl.className = 'settings-status';
+  statusEl.textContent = '';
+  try{
+    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+      headers:{'Authorization':`Bearer ${token}`, 'Accept':'application/vnd.github+json'}
+    });
+    if(!res.ok){
+      statusEl.className = 'settings-status err';
+      statusEl.textContent = res.status === 404 ? "Dépôt introuvable — vérifiez le nom et l'accès du code." : `Connexion refusée (code ${res.status}). Vérifiez le code d'accès.`;
+      return;
+    }
+    GH.owner = owner; GH.repo = repo; GH.branch = branch; GH.token = token;
+    localStorage.setItem('cr_gh_owner', owner);
+    localStorage.setItem('cr_gh_repo', repo);
+    localStorage.setItem('cr_gh_branch', branch);
+    localStorage.setItem('cr_gh_token', token);
+    statusEl.className = 'settings-status ok';
+    statusEl.textContent = 'Connecté ✓ Les prochaines données seront partagées.';
+    updateModeBadge();
+    updateSettingsHelpText();
+    await renderRail();
+  }catch(e){
+    statusEl.className = 'settings-status err';
+    statusEl.textContent = 'Connexion impossible — vérifiez votre accès internet.';
+  }
+});
+
+document.getElementById('revertLocalBtn').addEventListener('click', async ()=>{
+  GH.owner = ''; GH.repo = ''; GH.branch = 'main'; GH.token = '';
+  localStorage.removeItem('cr_gh_owner');
+  localStorage.removeItem('cr_gh_repo');
+  localStorage.removeItem('cr_gh_branch');
+  localStorage.removeItem('cr_gh_token');
+  document.getElementById('ghOwner').value = '';
+  document.getElementById('ghRepo').value = '';
+  document.getElementById('ghToken').value = '';
+  document.getElementById('settingsStatus').className = 'settings-status ok';
+  document.getElementById('settingsStatus').textContent = 'Revenu au stockage local ✓';
+  updateModeBadge();
+  updateSettingsHelpText();
+  await renderRail();
 });
 
 updateModeBadge();
