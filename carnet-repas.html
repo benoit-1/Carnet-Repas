@@ -132,6 +132,21 @@
     font-family:'DM Sans';cursor:pointer;background:#C1584A;color:#fff;
   }
 
+  .backup-reminder-banner{
+    margin:14px 20px 0;
+    background:#F1EEFB;
+    border:1px solid #D9D0F2;
+    border-radius:var(--radius);
+    padding:13px 15px;
+  }
+  .brb-text{
+    font-size:12.5px;color:#4B3A8A;line-height:1.5;margin:0 0 10px;
+  }
+  .brb-btn{
+    width:100%;border:none;border-radius:9px;padding:10px;font-size:12.5px;font-weight:600;
+    font-family:'DM Sans';cursor:pointer;background:#6B4FBB;color:#fff;
+  }
+
   .cal-nav{
     display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;
   }
@@ -548,6 +563,11 @@
   <div class="send-reminder-banner" id="sendReminderBanner" style="display:none;">
     <p class="srb-text" id="sendReminderText"></p>
     <button class="srb-btn" id="sendReminderBtn">📧 Envoyer le récap maintenant</button>
+  </div>
+
+  <div class="backup-reminder-banner" id="backupReminderBanner" style="display:none;">
+    <p class="brb-text" id="backupReminderText">Ça fait plus d'une semaine que vous n'avez pas fait de sauvegarde. Pensez-y pour éviter de perdre vos données.</p>
+    <button class="brb-btn" id="backupReminderBtn">⚙️ Faire une sauvegarde maintenant</button>
   </div>
 
   <button class="todayCard" id="todayCard">
@@ -1013,6 +1033,7 @@ async function renderRail(){
     updateAppBadge();
     updatePulseState();
     updateSendReminder();
+    updateBackupReminder();
     return;
   }
   document.getElementById('emptyState').style.display = 'none';
@@ -1028,6 +1049,7 @@ async function renderRail(){
   updateAppBadge();
   updatePulseState();
   updateSendReminder();
+  updateBackupReminder();
 
   railEl.innerHTML = '';
   let lastMonthKey = null;
@@ -1161,6 +1183,23 @@ function updateSendReminder(){
     `Nous sommes le ${day} — le récap de ${MONTHS_LONG_FR[m-1]} ${y} n'a pas encore été envoyé.`;
   banner.dataset.month = monthKey;
   banner.style.display = 'block';
+}
+
+const BACKUP_REMINDER_DAYS = 7;
+
+function updateBackupReminder(){
+  const banner = document.getElementById('backupReminderBanner');
+  if(Object.keys(currentEntries).length === 0){ banner.style.display = 'none'; return; }
+
+  const lastBackup = localStorage.getItem('cr_last_backup_date');
+  if(!lastBackup){
+    banner.style.display = 'block';
+    return;
+  }
+  const last = new Date(lastBackup);
+  const now = new Date(todayKey);
+  const diffDays = Math.floor((now - last) / (1000*60*60*24));
+  banner.style.display = diffDays >= BACKUP_REMINDER_DAYS ? 'block' : 'none';
 }
 
 function updateOldMonthBanner(){
@@ -1524,11 +1563,18 @@ document.getElementById('exportCsvBtn').addEventListener('click', async ()=>{
   await shareOrDownload(blob, `carnet-repas-recap-${todayKey}.csv`, 'text/csv', 'Récap repas');
 });
 
-document.getElementById('exportBackupBtn').addEventListener('click', async ()=>{
+async function performBackupExport(){
   const all = await getAllEntries();
-  if(Object.keys(all).length === 0){ showToast('Aucune donnée à exporter'); return; }
+  if(Object.keys(all).length === 0){ showToast('Aucune donnée à exporter'); return false; }
   const blob = new Blob([JSON.stringify(all, null, 2)], {type:'application/json'});
   await shareOrDownload(blob, `carnet-repas-sauvegarde-${todayKey}.json`, 'application/json', 'Sauvegarde carnet de repas');
+  try{ localStorage.setItem('cr_last_backup_date', todayKey); }catch(e){ /* pas critique */ }
+  return true;
+}
+
+document.getElementById('exportBackupBtn').addEventListener('click', async ()=>{
+  await performBackupExport();
+  updateBackupReminder();
 });
 
 const MONTHS_LONG_FR = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
@@ -1870,6 +1916,11 @@ document.getElementById('oldMonthDeleteBtn').addEventListener('click', ()=>{
 document.getElementById('sendReminderBtn').addEventListener('click', ()=>{
   const month = document.getElementById('sendReminderBanner').dataset.month;
   openEmailMonthPicker(month);
+});
+
+document.getElementById('backupReminderBtn').addEventListener('click', async ()=>{
+  const ok = await performBackupExport();
+  if(ok) updateBackupReminder();
 });
 
 function mondayOf(d){
