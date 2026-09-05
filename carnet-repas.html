@@ -1341,9 +1341,12 @@ function renderGuestPhoto(url){
   }
 }
 
-function closeSheet(){
+async function closeSheet(){
+  const keyBeingClosed = openKey;
+  await persistCurrentSheet();
   document.getElementById('overlay').classList.remove('open');
   openKey = null;
+  if(keyBeingClosed) await renderRail();
 }
 
 document.getElementById('closeSheet').addEventListener('click', closeSheet);
@@ -1446,15 +1449,24 @@ document.getElementById('cameraInput').addEventListener('change', async (e)=>{
 });
 
 
-document.getElementById('saveBtn').addEventListener('click', async ()=>{
-  if(!openKey) return;
+async function persistCurrentSheet(){
+  if(!openKey) return true;
   syncRowsFromDOM();
   const entry = currentEntries[openKey] || await loadEntry(openKey);
+  if(!entry) return true;
   entry.rows = workingRows.filter(r=> r.label.trim() !== '' || r.count !== '');
   entry.note = document.getElementById('noteField').value;
   const ok = await saveEntry(openKey, entry);
   if(ok){
     currentEntries[openKey] = entry;
+  }
+  return ok;
+}
+
+document.getElementById('saveBtn').addEventListener('click', async ()=>{
+  if(!openKey) return;
+  const ok = await persistCurrentSheet();
+  if(ok){
     showToast('Enregistré ✓');
     await renderRail();
   }else{
@@ -1503,7 +1515,8 @@ document.getElementById('confirmDeleteDayBtn').addEventListener('click', async (
   document.getElementById('deleteDayOverlay').classList.remove('open');
   if(ok){
     delete currentEntries[keyToDelete];
-    closeSheet();
+    document.getElementById('overlay').classList.remove('open');
+    openKey = null;
     showToast('Jour supprimé ✓');
     await renderRail();
   }else{
