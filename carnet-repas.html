@@ -1326,16 +1326,18 @@ function renderGuestPhoto(url){
         <button class="retake" id="guestRetakeBtn">🔄 Reprendre</button>
       </div>
     `;
-    document.getElementById('guestRetakeBtn').addEventListener('click', ()=>{
+    document.getElementById('guestRetakeBtn').addEventListener('click', async ()=>{
       captureTarget = 'guest';
       pendingCaptureKey = openKey;
+      await persistCurrentSheet();
       document.getElementById('cameraInput').click();
     });
   }else{
     wrap.innerHTML = `<div class="guest-photo-empty" id="guestAddBtn">📷 Ajouter une photo de la liste des invités</div>`;
-    document.getElementById('guestAddBtn').addEventListener('click', ()=>{
+    document.getElementById('guestAddBtn').addEventListener('click', async ()=>{
       captureTarget = 'guest';
       pendingCaptureKey = openKey;
+      await persistCurrentSheet();
       document.getElementById('cameraInput').click();
     });
   }
@@ -1409,9 +1411,10 @@ document.getElementById('fabBtn').addEventListener('click', ()=>{
   captureTarget = 'main';
   openDatePicker();
 });
-document.getElementById('retakeBtn').addEventListener('click', ()=>{
+document.getElementById('retakeBtn').addEventListener('click', async ()=>{
   captureTarget = 'main';
   pendingCaptureKey = openKey;
+  await persistCurrentSheet();
   document.getElementById('cameraInput').click();
 });
 
@@ -1426,6 +1429,13 @@ document.getElementById('cameraInput').addEventListener('change', async (e)=>{
     pendingCaptureKey = null;
     captureTarget = 'main';
     let entry = currentEntries[key] || await loadEntry(key) || {date:key, rows: defaultRows(), note:''};
+    // Filet de sécurité : si la fiche de ce jour est actuellement ouverte, on ne perd jamais
+    // ce qui est affiché à l'écran (au cas où ce n'aurait pas déjà été sauvegardé).
+    if(key === openKey){
+      syncRowsFromDOM();
+      entry.rows = workingRows.filter(r=> r.label.trim() !== '' || r.count !== '');
+      entry.note = document.getElementById('noteField').value;
+    }
     if(target === 'guest'){
       entry.guestPhoto = dataUrl;
     }else{
