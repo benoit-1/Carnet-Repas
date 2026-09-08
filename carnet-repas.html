@@ -1326,19 +1326,19 @@ function renderGuestPhoto(url){
         <button class="retake" id="guestRetakeBtn">🔄 Reprendre</button>
       </div>
     `;
-    document.getElementById('guestRetakeBtn').addEventListener('click', async ()=>{
+    document.getElementById('guestRetakeBtn').addEventListener('click', ()=>{
       captureTarget = 'guest';
       pendingCaptureKey = openKey;
-      await persistCurrentSheet();
       document.getElementById('cameraInput').click();
+      persistCurrentSheet();
     });
   }else{
     wrap.innerHTML = `<div class="guest-photo-empty" id="guestAddBtn">📷 Ajouter une photo de la liste des invités</div>`;
-    document.getElementById('guestAddBtn').addEventListener('click', async ()=>{
+    document.getElementById('guestAddBtn').addEventListener('click', ()=>{
       captureTarget = 'guest';
       pendingCaptureKey = openKey;
-      await persistCurrentSheet();
       document.getElementById('cameraInput').click();
+      persistCurrentSheet();
     });
   }
 }
@@ -1411,11 +1411,11 @@ document.getElementById('fabBtn').addEventListener('click', ()=>{
   captureTarget = 'main';
   openDatePicker();
 });
-document.getElementById('retakeBtn').addEventListener('click', async ()=>{
+document.getElementById('retakeBtn').addEventListener('click', ()=>{
   captureTarget = 'main';
   pendingCaptureKey = openKey;
-  await persistCurrentSheet();
   document.getElementById('cameraInput').click();
+  persistCurrentSheet();
 });
 
 document.getElementById('cameraInput').addEventListener('change', async (e)=>{
