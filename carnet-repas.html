@@ -1884,7 +1884,7 @@ document.getElementById('confirmMonthBtn').addEventListener('click', async ()=>{
   if(!month){ showToast('Choisissez un mois'); return; }
   const recap = await buildMonthRecap(month);
   if(!recap){ showToast('Aucune donnée pour ce mois'); return; }
-  const mailtoUrl = `mailto:${encodeURIComponent(selectedRecipient)}?subject=${encodeURIComponent(recap.subject)}&body=${encodeURIComponent(recap.body)}`;
+  const mailtoUrl = `mailto:${selectedRecipient}?subject=${encodeURIComponent(recap.subject)}&body=${encodeURIComponent(recap.body)}`;
   window.location.href = mailtoUrl;
   document.getElementById('monthPickerOverlay').classList.remove('open');
   markMonthSent(month);
