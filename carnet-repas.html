@@ -563,6 +563,8 @@
     <div class="mtc-value" id="mtcValue">0</div>
   </div>
 
+  <button class="btn save" id="homeSendRecapBtn" style="width:100%;margin:0 0 14px;">📄 Envoyer le récap du mois</button>
+
   <div class="old-month-banner" id="oldMonthBanner" style="display:none;">
     <p class="omb-text" id="oldMonthText"></p>
     <div class="omb-actions">
@@ -674,7 +676,7 @@
   <div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-top">
-      <span class="date">Réglages du stockage</span>
+      <span class="date">Réglages</span>
       <button class="close-btn" id="closeSettings">✕</button>
     </div>
 
@@ -690,17 +692,15 @@
       <button class="btn save" id="emailBookAddBtn" style="flex:0 0 44px; padding:0;">+</button>
     </div>
 
-    <button class="add-row" id="emailMonthBtn" style="margin-bottom:8px;">📧 Récap du mois par email</button>
-    <button class="add-row" id="exportCsvBtn" style="margin-bottom:16px;">📊 Récap chiffres (fichier Excel/CSV)</button>
 
     <div style="border-top:1px solid var(--line); margin: 4px 0 10px;"></div>
-    <p style="font-size:11px; color:var(--ink-muted); margin:0 0 8px;">Avancé — fichier technique, pas fait pour être lu ni envoyé à quelqu'un</p>
+    <p style="font-size:11px; color:var(--ink-muted); margin:0 0 8px;">Sauvegarde — fichier technique de secours, pas fait pour être lu</p>
     <button class="add-row" id="exportBackupBtn" style="margin-bottom:8px;">⚙️ Sauvegarde technique (fichier de secours)</button>
     <button class="add-row" id="restoreBackupBtn" style="margin-bottom:16px;">♻️ Restaurer depuis un fichier de secours</button>
     <input type="file" id="restoreInput" accept=".json,application/json" style="display:none">
 
-    <div style="border-top:1px solid var(--line); margin: 4px 0 10px;"></div>
-    <p style="font-size:11px; color:var(--ink-muted); margin:0 0 8px;">Stockage partagé (optionnel) — d'autres personnes avec le code d'accès pourront consulter les mêmes données</p>
+    <details style="margin-bottom:12px;"><summary style="font-size:12px;color:var(--ink-muted);cursor:pointer;">Options avancées</summary>
+    <p style="font-size:11px; color:var(--ink-muted); margin:10px 0 8px;">Stockage partagé (optionnel) — d'autres personnes avec le code d'accès pourront consulter les mêmes données</p>
 
     <p class="field-label" style="margin-top:0;">Propriétaire (utilisateur GitHub)</p>
     <input class="field-input" id="ghOwner" placeholder="ex : benoit-1">
@@ -719,7 +719,8 @@
     <div class="actions" style="margin-top:14px;">
       <button class="btn save" id="testSettingsBtn" style="flex:1;">Connecter</button>
     </div>
-    <button class="add-row" id="revertLocalBtn" style="margin-top:10px;margin-bottom:16px;">Revenir au stockage local</button>
+    <button class="add-row" id="revertLocalBtn" style="margin-top:10px;margin-bottom:8px;">Revenir au stockage local</button>
+    </details>
 
     <div style="border-top:1px solid var(--line); margin: 4px 0 14px;"></div>
     <button class="add-row" id="deleteMonthBtn" style="color:#C1584A; border-color:#F0D3CE;">🗑️ Supprimer un mois</button>
@@ -800,14 +801,17 @@
       <button class="close-btn" id="closeMonthPicker">✕</button>
     </div>
     <div class="date-picker-body">
-      <p class="hint">Choisissez le mois à récapituler — le récap s'ouvrira dans l'app Mail, prêt à envoyer.</p>
+      <p class="hint">Choisissez le mois : le récap (chiffres + photos classées par série) est prêt à envoyer.</p>
       <input type="month" class="date-input" id="monthPickerInput">
-      <p class="field-label" style="margin-top:0;">Destinataire (optionnel)</p>
-      <div class="recipient-chips" id="recipientChips"></div>
       <p class="field-label" style="margin-top:0;">Message à ajouter avec le PDF (optionnel)</p>
       <textarea class="date-input" id="shareMessage" rows="3" placeholder="Ex : Bonjour, voici le récap des repas du mois." style="width:100%;margin-bottom:14px;font-family:inherit;"></textarea>
-      <button class="btn save" id="confirmMonthBtn" style="width:100%;margin-bottom:8px;">📧 Chiffres par email</button>
-      <button class="add-row" id="confirmMonthPhotosBtn" style="width:100%;">🖼️ Chiffres + photos (PDF compressé)</button>
+      <button class="btn save" id="confirmMonthPhotosBtn" style="width:100%;margin-bottom:14px;">📄 Envoyer le récap du mois</button>
+      <details style="margin-top:4px;">
+        <summary style="font-size:12px;color:var(--ink-muted);cursor:pointer;">Envoi rapide en texte seulement (sans photos)</summary>
+        <p class="field-label" style="margin-top:10px;">Destinataires</p>
+        <div class="recipient-chips" id="recipientChips"></div>
+        <button class="add-row" id="confirmMonthBtn" style="width:100%;">📧 Chiffres par email</button>
+      </details>
     </div>
   </div>
 </div>
@@ -1630,7 +1634,7 @@ async function getAllEntries(){
   return all;
 }
 
-document.getElementById('exportCsvBtn').addEventListener('click', async ()=>{
+document.getElementById('exportCsvBtn')?.addEventListener('click', async ()=>{
   const all = await getAllEntries();
   const dates = Object.keys(all).sort();
   if(dates.length === 0){ showToast('Aucune donnée à exporter'); return; }
@@ -1827,61 +1831,52 @@ async function buildMonthPDF(recap){
   });
   sectionBox('DÉTAIL PAR JOUR', dayRows, y);
 
-  // Page de séparation avant les photos, seulement s'il y en a
-  const hasAnyPhoto = recap.dates.some(d => recap.all[d].photo);
-  if(hasAnyPhoto){
+  // Photos regroupées par série
+  const series = [
+    {title:'Liste principale', sub:'Résidents, personnel, direction…', field:'photo', showRows:true},
+    {title:'Invités', sub:'Listes des invités', field:'guestPhoto', showRows:false},
+  ];
+  const maxW = pageW - margin*2;
+  const maxH = pageH - 60;
+  for(const sr of series){
+    const ds = recap.dates.filter(d => recap.all[d][sr.field]);
+    if(ds.length === 0) continue;
     doc.addPage();
     doc.setTextColor(...blue);
     doc.setFont(undefined, 'bold');
     doc.setFontSize(20);
-    doc.text('Détail', pageW/2, pageH/2 - 8, {align:'center'});
+    doc.text(sr.title, pageW/2, pageH/2 - 8, {align:'center'});
     doc.setFontSize(13);
     doc.setTextColor(100,110,120);
     doc.setFont(undefined, 'normal');
-    doc.text('Photos des listes du mois, jour par jour', pageW/2, pageH/2 + 2, {align:'center'});
-  }
+    doc.text(sr.sub + ' — ' + recap.monthLabel, pageW/2, pageH/2 + 2, {align:'center'});
 
-  for(const d of recap.dates){
-    const entry = recap.all[d];
-    if(!entry.photo) continue;
-    doc.addPage();
-    const {dataUrl: compressed, w: iw, h: ih} = await compressForPdf(entry.photo);
-    const maxW = pageW - margin*2;
-    const maxH = pageH - 60;
-    let w = maxW;
-    let h = (ih * w) / iw;
-    if(h > maxH){ h = maxH; w = (iw * h) / ih; }
-
-    const rows = (entry.rows||[]).filter(r=>r.label);
-    const total = rows.reduce((s,r)=> s + (parseInt(r.count)||0),0);
-
-    doc.setFontSize(14);
-    doc.setTextColor(...blue);
-    doc.setFont(undefined, 'bold');
-    doc.text(formatLong(d), margin, 20);
-    doc.setFont(undefined, 'normal');
-    doc.setTextColor(...dark);
-    doc.setFontSize(11);
-    doc.text(rows.map(r=>`${r.label}: ${r.count||0}`).join('   ') + `   —   Total: ${total}`, margin, 28);
-    if(entry.note){
-      doc.setFontSize(9.5);
-      doc.text(`Note : ${entry.note}`, margin, 34);
-    }
-    doc.addImage(compressed, 'JPEG', margin, 40, w, h);
-
-    if(entry.guestPhoto){
+    for(const d of ds){
+      const entry = recap.all[d];
       doc.addPage();
-      const g = await compressForPdf(entry.guestPhoto);
-      let gw = maxW;
-      let gh = (g.h * gw) / g.w;
-      if(gh > maxH){ gh = maxH; gw = (g.w * gh) / g.h; }
+      const c = await compressForPdf(entry[sr.field]);
+      let w = maxW;
+      let h = (c.h * w) / c.w;
+      if(h > maxH){ h = maxH; w = (c.w * h) / c.h; }
       doc.setFontSize(14);
       doc.setTextColor(...blue);
       doc.setFont(undefined, 'bold');
-      doc.text(`${formatLong(d)} — Liste des invités`, margin, 20);
+      doc.text(`${formatLong(d)} — ${sr.title}`, margin, 20);
       doc.setFont(undefined, 'normal');
       doc.setTextColor(...dark);
-      doc.addImage(g.dataUrl, 'JPEG', margin, 30, gw, gh);
+      let top = 30;
+      if(sr.showRows){
+        const rows = (entry.rows||[]).filter(r=>r.label);
+        const total = rows.reduce((t,r)=> t + (parseInt(r.count)||0),0);
+        doc.setFontSize(11);
+        doc.text(rows.map(r=>`${r.label}: ${r.count||0}`).join('   ') + `   —   Total: ${total}`, margin, 28);
+        top = 40;
+        if(entry.note){
+          doc.setFontSize(9.5);
+          doc.text(`Note : ${entry.note}`, margin, 34);
+        }
+      }
+      doc.addImage(c.dataUrl, 'JPEG', margin, top, w, h);
     }
   }
 
@@ -1903,7 +1898,8 @@ function openEmailMonthPicker(presetMonth){
   renderRecipientChips();
   document.getElementById('monthPickerOverlay').classList.add('open');
 }
-document.getElementById('emailMonthBtn').addEventListener('click', ()=>{
+document.getElementById('homeSendRecapBtn').addEventListener('click', ()=>{ openEmailMonthPicker(); });
+document.getElementById('emailMonthBtn')?.addEventListener('click', ()=>{
   openEmailMonthPicker();
 });
 document.getElementById('closeMonthPicker').addEventListener('click', ()=>{
