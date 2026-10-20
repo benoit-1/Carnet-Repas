@@ -802,12 +802,15 @@
       <input type="month" class="date-input" id="monthPickerInput">
       <p class="field-label" style="margin-top:0;">Destinataire (optionnel)</p>
       <div class="recipient-chips" id="recipientChips"></div>
+      <p class="field-label" style="margin-top:0;">Message à ajouter avec le PDF (optionnel)</p>
+      <textarea class="date-input" id="shareMessage" rows="3" placeholder="Ex : Bonjour, voici le récap des repas du mois." style="width:100%;margin-bottom:14px;font-family:inherit;"></textarea>
       <button class="btn save" id="confirmMonthBtn" style="width:100%;margin-bottom:8px;">📧 Chiffres par email</button>
       <button class="add-row" id="confirmMonthPhotosBtn" style="width:100%;">🖼️ Chiffres + photos (PDF compressé)</button>
     </div>
   </div>
 </div>
 
+<div style="text-align:center;font-size:11px;color:#8a94a6;padding:18px 0 28px;">Application créée par Benoit Bureau · 2026</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1595,11 +1598,11 @@ document.getElementById('confirmDeleteDayBtn').addEventListener('click', async (
   }
 });
 
-async function shareOrDownload(blob, filename, mimeType, shareTitle){
+async function shareOrDownload(blob, filename, mimeType, shareTitle, shareText){
   const file = new File([blob], filename, {type: mimeType});
   if(navigator.canShare && navigator.canShare({files:[file]})){
     try{
-      await navigator.share({files:[file], title: shareTitle});
+      await navigator.share(shareText ? {files:[file], title: shareTitle, text: shareText} : {files:[file], title: shareTitle});
       return;
     }catch(e){
       if(e && e.name === 'AbortError') return;
@@ -1858,6 +1861,13 @@ async function buildMonthPDF(recap){
     }
   }
 
+  const nPages = doc.getNumberOfPages();
+  for(let i=1;i<=nPages;i++){
+    doc.setPage(i);
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(130,140,155);
+    doc.text('Benoit Bureau · 2026', pageW/2, pageH-8, {align:'center'});
+    doc.text(i+' / '+nPages, pageW-margin, pageH-8, {align:'right'});
+  }
   return doc.output('blob');
 }
 
@@ -1900,7 +1910,9 @@ document.getElementById('confirmMonthPhotosBtn').addEventListener('click', async
   try{
     const pdfBlob = await buildMonthPDF(recap);
     document.getElementById('monthPickerOverlay').classList.remove('open');
-    await shareOrDownload(pdfBlob, `recap-repas-${month}.pdf`, 'application/pdf', recap.subject);
+    const msg = document.getElementById('shareMessage').value.trim();
+    try{ localStorage.setItem('cr_share_message', msg); }catch(e){}
+    await shareOrDownload(pdfBlob, `recap-repas-${month}.pdf`, 'application/pdf', recap.subject, msg);
     markMonthSent(month);
     updateSendReminder();
   }catch(e){
@@ -2115,8 +2127,9 @@ function renderEmailBookList(){
   });
 }
 
-let selectedRecipient = '';
-let recipientExplicitlyOther = false;
+try{ var sm = localStorage.getItem('cr_share_message'); document.getElementById('shareMessage').value = (sm===null) ? 'Bonjour, voici le récap des repas du mois. Cordialement.' : sm; }catch(e){}
+let selectedRecipient = '';           // adresses séparées par des virgules (pour mailto)
+let selectedSet = null;               // Set des adresses cochées (null = pas encore initialisé)
 
 function renderRecipientChips(){
   const wrap = document.getElementById('recipientChips');
@@ -2124,18 +2137,30 @@ function renderRecipientChips(){
   if(book.length === 0){
     wrap.innerHTML = `<span style="font-size:12px;color:var(--ink-muted);">Aucun destinataire enregistré — vous pourrez taper l'adresse directement dans Mail, ou en ajouter un dans ⚙️ Réglages.</span>`;
     selectedRecipient = '';
+    selectedSet = new Set();
     return;
   }
-  if(!recipientExplicitlyOther && !book.some(c=>c.email === selectedRecipient)) selectedRecipient = book[0].email;
+  if(selectedSet === null) selectedSet = new Set([book[0].email]);
+  // retirer les adresses qui n'existent plus dans le carnet
+  selectedSet = new Set([...selectedSet].filter(e=>book.some(c=>c.email===e)));
+  selectedRecipient = [...selectedSet].join(',');
+  const allOn = book.length>1 && book.every(c=>selectedSet.has(c.email));
+  const allChip = book.length>1 ? `<button type="button" class="recipient-chip ${allOn?'active':''}" data-all="1">👥 Tous</button>` : '';
   const chips = book.map(c=>`
-    <button type="button" class="recipient-chip ${c.email===selectedRecipient && !recipientExplicitlyOther ?'active':''}" data-email="${c.email}">${c.name || c.email}</button>
+    <button type="button" class="recipient-chip ${selectedSet.has(c.email)?'active':''}" data-email="${c.email}">${selectedSet.has(c.email)?'✓ ':''}${c.name || c.email}</button>
   `).join('');
-  const otherChip = `<button type="button" class="recipient-chip ${recipientExplicitlyOther?'active':''}" data-email="">✏️ Autre adresse</button>`;
-  wrap.innerHTML = chips + otherChip;
+  const otherChip = `<button type="button" class="recipient-chip ${selectedSet.size===0?'active':''}" data-other="1">✏️ Autre adresse</button>`;
+  wrap.innerHTML = allChip + chips + otherChip;
   wrap.querySelectorAll('.recipient-chip').forEach(chip=>{
     chip.addEventListener('click', ()=>{
-      selectedRecipient = chip.dataset.email;
-      recipientExplicitlyOther = (chip.dataset.email === '');
+      if(chip.dataset.all){
+        selectedSet = allOn ? new Set() : new Set(book.map(c=>c.email));
+      } else if(chip.dataset.other){
+        selectedSet = new Set();
+      } else {
+        const e = chip.dataset.email;
+        if(selectedSet.has(e)) selectedSet.delete(e); else selectedSet.add(e);
+      }
       renderRecipientChips();
     });
   });
