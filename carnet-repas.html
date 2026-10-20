@@ -1780,7 +1780,7 @@ async function buildMonthPDF(recap){
   doc.setTextColor(100,110,120);
   doc.setFont(undefined, 'normal');
   doc.setFontSize(10);
-  doc.text(formatLong(todayKey), pageW/2, 26, {align:'center'});
+  doc.text('Benoit Bureau · ' + formatLong(todayKey), pageW/2, 26, {align:'center'});
 
   doc.setTextColor(...blue);
   doc.setFont(undefined, 'bold');
