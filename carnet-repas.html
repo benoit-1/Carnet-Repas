@@ -695,7 +695,9 @@
 
     <div style="border-top:1px solid var(--line); margin: 4px 0 10px;"></div>
     <p style="font-size:11px; color:var(--ink-muted); margin:0 0 8px;">Avancé — fichier technique, pas fait pour être lu ni envoyé à quelqu'un</p>
-    <button class="add-row" id="exportBackupBtn" style="margin-bottom:16px;">⚙️ Sauvegarde technique (fichier de secours)</button>
+    <button class="add-row" id="exportBackupBtn" style="margin-bottom:8px;">⚙️ Sauvegarde technique (fichier de secours)</button>
+    <button class="add-row" id="restoreBackupBtn" style="margin-bottom:16px;">♻️ Restaurer depuis un fichier de secours</button>
+    <input type="file" id="restoreInput" accept=".json,application/json" style="display:none">
 
     <div style="border-top:1px solid var(--line); margin: 4px 0 10px;"></div>
     <p style="font-size:11px; color:var(--ink-muted); margin:0 0 8px;">Stockage partagé (optionnel) — d'autres personnes avec le code d'accès pourront consulter les mêmes données</p>
@@ -1662,6 +1664,28 @@ async function performBackupExport(){
 document.getElementById('exportBackupBtn').addEventListener('click', async ()=>{
   await performBackupExport();
   updateBackupReminder();
+});
+
+document.getElementById('restoreBackupBtn').addEventListener('click', ()=>{
+  document.getElementById('restoreInput').click();
+});
+document.getElementById('restoreInput').addEventListener('change', async (e)=>{
+  const f = e.target.files[0];
+  e.target.value = '';
+  if(!f) return;
+  try{
+    const data = JSON.parse(await f.text());
+    const keys = Object.keys(data).filter(k=>/^\d{4}-\d{2}-\d{2}$/.test(k));
+    if(keys.length === 0){ showToast('Fichier non reconnu'); return; }
+    if(!confirm(`Restaurer ${keys.length} jour(s) depuis ce fichier ?\nLes jours déjà présents seront remplacés par ceux du fichier.`)) return;
+    let n = 0;
+    for(const k of keys){ if(await saveEntry(k, data[k])) n++; }
+    showToast(`${n} jour(s) restauré(s) ✓`);
+    renderRail();
+  }catch(err){
+    console.error(err);
+    showToast('Erreur : fichier illisible');
+  }
 });
 
 const MONTHS_LONG_FR = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
