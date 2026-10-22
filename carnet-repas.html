@@ -549,10 +549,10 @@
 <div class="app">
   <header>
     <button class="gear-btn" id="gearBtn" title="Réglages">⚙️</button>
-    <p class="eyebrow">Cuisine · EHPAD</p>
+    <p class="eyebrow" id="etabLabel">Cuisine · EHPAD</p>
     <h1>Carnet de repas</h1>
     <p class="today" id="todayLabel"></p>
-    <p class="mode-badge" id="modeBadge"><span class="dot"></span><span id="modeText">Stockage Claude</span></p>
+    <p class="mode-badge local" id="modeBadge"><span class="dot"></span><span id="modeText">Stockage local (cet appareil)</span></p>
   </header>
 
   <div class="month-total-card" id="monthTotalCard">
@@ -684,6 +684,9 @@
       Toutes vos données (photos et chiffres) sont enregistrées <strong>directement sur cet appareil</strong>, dans le navigateur — rien à configurer, rien envoyé ailleurs.
     </p>
 
+    <p class="field-label" style="margin-top:0;">Nom affiché en haut de l'écran</p>
+    <input class="field-input" id="etabInput" placeholder="ex : Cuisine · EHPAD Les Tilleuls" style="margin-bottom:16px;">
+
     <p class="field-label" style="margin-top:0;">Carnet d'adresses (destinataires à choisir à l'envoi)</p>
     <div id="emailBookList" style="margin-bottom:8px;"></div>
     <div style="display:flex; gap:6px; margin-bottom:16px;">
@@ -699,7 +702,7 @@
     <button class="add-row" id="restoreBackupBtn" style="margin-bottom:16px;">♻️ Restaurer depuis un fichier de secours</button>
     <input type="file" id="restoreInput" accept=".json,application/json" style="display:none">
 
-    <details style="margin-bottom:12px;"><summary style="font-size:12px;color:var(--ink-muted);cursor:pointer;">Options avancées</summary>
+    <details id="optionsAvancees" style="margin-bottom:12px; display:none;"><summary style="font-size:12px;color:var(--ink-muted);cursor:pointer;">Options avancées</summary>
     <p style="font-size:11px; color:var(--ink-muted); margin:10px 0 8px;">Stockage partagé (optionnel) — d'autres personnes avec le code d'accès pourront consulter les mêmes données</p>
 
     <p class="field-label" style="margin-top:0;">Propriétaire (utilisateur GitHub)</p>
@@ -908,6 +911,16 @@ const GH = {
   token: localStorage.getItem('cr_gh_token') || '',
 };
 function ghConfigured(){ return !!(GH.owner && GH.repo && GH.token); }
+
+// Nom de l'établissement affiché dans l'en-tête (modifiable dans les Réglages)
+const ETAB_DEFAUT = 'Cuisine · EHPAD';
+function lireEtab(){ try{ return localStorage.getItem('cr_etablissement') || ETAB_DEFAUT; }catch(e){ return ETAB_DEFAUT; } }
+function afficherEtab(){ const el=document.getElementById('etabLabel'); if(el) el.textContent = lireEtab(); }
+// Options avancées (stockage partagé GitHub) : réservées au créateur.
+// Visibles seulement si déjà configurées sur cet appareil, ou avec ?avance=1 dans l'adresse.
+function optionsAvanceesAutorisees(){
+  try{ return ghConfigured() || new URLSearchParams(location.search).get('avance') === '1'; }catch(e){ return ghConfigured(); }
+}
 
 function b64EncodeUnicode(str){
   return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (m,p)=>String.fromCharCode('0x'+p)));
@@ -2206,10 +2219,18 @@ document.getElementById('gearBtn').addEventListener('click', ()=>{
   document.getElementById('ghBranch').value = GH.branch || 'main';
   document.getElementById('ghToken').value = GH.token;
   renderEmailBookList();
+  document.getElementById('etabInput').value = lireEtab();
+  document.getElementById('optionsAvancees').style.display = optionsAvanceesAutorisees() ? '' : 'none';
   document.getElementById('settingsStatus').className = 'settings-status';
   updateSettingsHelpText();
   document.getElementById('settingsOverlay').classList.add('open');
 });
+document.getElementById('etabInput').addEventListener('input', (e)=>{
+  const v = e.target.value.trim();
+  try{ if(v) localStorage.setItem('cr_etablissement', v); else localStorage.removeItem('cr_etablissement'); }catch(err){}
+  afficherEtab();
+});
+afficherEtab();
 document.getElementById('closeSettings').addEventListener('click', ()=>{
   document.getElementById('settingsOverlay').classList.remove('open');
 });
