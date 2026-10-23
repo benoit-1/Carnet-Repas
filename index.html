@@ -816,7 +816,7 @@
   </div>
 </div>
 
-<div style="text-align:center;font-size:11px;color:#8a94a6;padding:18px 0 28px;">Application créée par Benoit Bureau · 2026</div>
+<div style="text-align:center;font-size:11px;color:#8a94a6;padding:18px 0 28px;">Application créée par Benoit Bureau · 2026 · version 23.10-c</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1836,14 +1836,14 @@ async function buildMonthPDF(recap){
   const hasPhotoDay = d => !!(recap.all[d].photo || recap.all[d].guestPhoto);
   sectionBox('DÉTAIL PAR JOUR', dayRows, y, {
     didParseCell: (data)=>{
-      if(data.section==='body' && data.column.index===0 && hasPhotoDay(recap.dates[data.row.index])){
+      if(data.section==='body' && hasPhotoDay(recap.dates[data.row.index])){
         data.cell.styles.textColor = blue;
       }
     },
     didDrawCell: (data)=>{
       if(data.section==='body' && data.column.index===0){
         const d = recap.dates[data.row.index];
-        if(hasPhotoDay(d)) dayLinks[d] = {page: doc.internal.getCurrentPageInfo().pageNumber, x:data.cell.x, y:data.cell.y, w:data.cell.width, h:data.cell.height};
+        if(hasPhotoDay(d)) dayLinks[d] = {page: doc.internal.getCurrentPageInfo().pageNumber, x:data.cell.x, y:data.cell.y, w:tableW, h:data.cell.height};
       }
     },
   });
