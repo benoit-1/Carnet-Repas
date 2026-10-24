@@ -550,7 +550,7 @@
   <header>
     <button class="gear-btn" id="gearBtn" title="Réglages">⚙️</button>
     <p class="eyebrow">Cuisine · EHPAD</p>
-    <h1>Carnet de repas <span style="font-size:11px;font-weight:400;opacity:.75;letter-spacing:0;white-space:nowrap;">v23.10-f</span></h1>
+    <h1>Carnet de repas <span style="font-size:11px;font-weight:400;opacity:.75;letter-spacing:0;white-space:nowrap;">v23.10-g</span></h1>
     <p class="today" id="todayLabel"></p>
     <p class="mode-badge" id="modeBadge"><span class="dot"></span><span id="modeText">Stockage Claude</span></p>
   </header>
@@ -1846,15 +1846,24 @@ async function buildMonthPDF(recap){
         doc.setFont(undefined, 'normal');
         doc.setFontSize(9.5);
         doc.setTextColor(...blue);
+        const x0 = data.cell.x, colEnd = data.cell.x + data.cell.width, rowEnd = data.cell.x + tableW;
+        const found = [];
         if(e.photo){
           doc.text('› liste principale', x, ty);
-          items.push({key:'photo', x:x-1, w:40});
+          found.push({key:'photo', x:x-1});
           x += 42;
         }
         if(e.guestPhoto){
           doc.text('› invités', x, ty);
-          items.push({key:'guestPhoto', x:x-1, w:26});
+          found.push({key:'guestPhoto', x:x-1});
         }
+        // Zones cliquables : toute la ligne, partagée entre les photos
+        found.forEach((f, i)=>{
+          const start = i === 0 ? x0 : f.x;
+          const end = (i === found.length-1) ? (found.length === 1 ? rowEnd : colEnd) : found[i+1].x;
+          items.push({key:f.key, x:start, w:end-start});
+        });
+        if(found.length === 2) items.push({key:found[0].key, x:colEnd, w:rowEnd-colEnd});
         dayLinks[d] = {page: doc.internal.getCurrentPageInfo().pageNumber, y:data.cell.y, h:data.cell.height, items};
       }
     },
